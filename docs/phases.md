@@ -1,11 +1,11 @@
-# Phased Development Roadmap for HemaLink Frontend
+# Phased Development Roadmap for BloodBridge Frontend
 
 ## Phase 1: Setup, Design Tokens & Shell Layouts
 
 - Initialize Vite + React project with Tailwind CSS and Lucide React.
 - Configure shadcn/ui components (`button`, `card`, `table`, `dialog`, `badge`, `sheet`, `tabs`, `input`, `textarea`, `dropdown-menu`, `toast`).
 - Configure theme colors (`primary: #E10600`, clean white backgrounds `#FFFFFF`, neutral borders `#E2E8F0`).
-- Create portal app layouts with the top navigation bar, HemaLink logo, user role switcher, and sidebar navigation.
+- Create portal app layouts with the top navigation bar, BloodBridge logo, user role switcher, and sidebar navigation.
 
 ## Phase 2: Mock Data Store & State Infrastructure
 

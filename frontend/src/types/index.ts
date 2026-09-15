@@ -18,7 +18,7 @@ export type FulfillmentStatus =
 export interface User {
   id: string;
   name: string;
-  role: "Admin" | "Hospital" | "Partner" | "Donor";
+  role: "Admin" | "Hospital" | "Partner" | "Donor" | "Requestor";
   phone: string;
   email: string;
   password?: string;
@@ -67,6 +67,13 @@ export interface FulfillmentRecord {
   createdAt: string;
   handoverAt?: string;
   confirmedAt?: string;
+}
+export interface InventoryItem {
+  id: string;
+  bloodGroup: BloodGroup;
+  componentType: string;
+  unitsAvailable: number;
+  lastUpdated: string;
 }
 export interface SafetyFlag {
   id: string;

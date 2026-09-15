@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="./docs/hemalink_logo.png" alt="HemaLink" width="350" />
+  <img src="./docs/bloodbridge_logo.png" alt="BloodBridge" width="350" />
 </p>
 
-HemaLink is a frontend web platform for connecting blood requests with hospitals, donors, and partner institutions. It is being developed for Alkhidmat Foundation.
+BloodBridge is a frontend web platform for connecting blood requests with hospitals, donors, and partner institutions. It is being developed for Alkhidmat Foundation.
 
 The project currently contains three separate role-based portals:
 
@@ -38,7 +38,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL shown by Vite, usually `http://localhost:5173`.
+Open the local URL shown by Vite, usually `http://localhost:5173`. The backend API runs at `http://localhost:8001`.
 
 ## Available Commands
 
@@ -57,9 +57,9 @@ These accounts are for local frontend demonstration only.
 
 | Portal | Email | Password |
 | --- | --- | --- |
-| Admin | `sara@hemalink.org` | `Admin@123` |
-| Central City Hospital | `hamza@centralcityhospital.org` | `Hospital@123` |
-| Alkhidmat Welfare Centre | `ayesha@alkhidmat.org` | `Partner@123` |
+| Admin | `demo_admin@hemalink.com` | `DemoAdmin@123` |
+| Central City Hospital | `demo_hospital@hemalink.com` | `DemoHospital@123` |
+| Alkhidmat Welfare Centre | `demo_partner@hemalink.com` | `DemoPartner@123` |
 
 Production authentication must replace these mock credentials.
 

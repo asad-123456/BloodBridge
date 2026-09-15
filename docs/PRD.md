@@ -1,9 +1,13 @@
-# Product Requirements Document (PRD) - HemaLink Frontend Web Portals
+# Product Requirements Document (PRD) - BloodBridge Frontend Web Portals
 
 ## 1. Project Overview & Scope Guardrails
 
-HemaLink is a blood donor matching platform built for Alkhidmat Foundation[cite: 2].
-**STRICT FRONTEND-ONLY SCOPE:** The AI Agent is strictly restricted to building the client-side single-page application (SPA) using React (Vite), Tailwind CSS, and shadcn/ui components. No backend, database, microservices, mobile apps, or SMS/IVR integrations are to be implemented[cite: 2]. All backend calls, matching algorithms, push notifications, and data updates MUST be simulated using local mock state, in-memory React Context/Zustand stores, or mock storage handlers.
+BloodBridge is a web-only management system for the blood donor matching
+network operated by Alkhidmat Foundation[cite: 2]. The deliverable includes
+the React/Vite web interface and its FastAPI/PostgreSQL backend. Individual
+donor and requestor mobile applications are outside this project's scope.
+Real web workflows must use the backend and PostgreSQL; demo accounts may use
+the explicitly separated mock state described in `docs/agent-handoff.md`.
 
 The scope consists strictly of the three desktop web stakeholder portals designed in Penpot[cite: 1]:
 

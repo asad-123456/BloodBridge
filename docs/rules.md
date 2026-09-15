@@ -17,6 +17,6 @@
 
 1. **Component Modularity:** Reuse common widgets (`StatCard`, `TrustBadge`, `UrgencyBadge`, `AppSidebar`, `AppHeader`, `DataTable`).
 2. **Shadcn Primitives:** Leverage standard shadcn/Radix components for dialogs, popovers, dropdowns, sheets, and tables.
-3. **Tailwind Best Practices:** Use utility classes cleanly. Adhere strictly to the design token palette (HemaLink Red `#E10600` / `#C80000`, slate neutrals, pure white cards).
+3. **Tailwind Best Practices:** Use utility classes cleanly. Adhere strictly to the design token palette (BloodBridge Red `#E10600` / `#C80000`, slate neutrals, pure white cards).
 4. **Interactive Mock Feedback:** Every primary button (`Approve`, `Verify`, `Can Fulfill`, `Publish Request`, `Resolve Flag`) must trigger immediate visual state changes in the UI (toasts, badge updates, table row status changes).
 ```

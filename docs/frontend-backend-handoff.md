@@ -1,4 +1,4 @@
-# HemaLink Frontend to Backend Handoff
+# BloodBridge Frontend to Backend Handoff
 
 ## Current frontend boundary
 
@@ -22,9 +22,9 @@ Portal login uses registered email and password only. Hospital and Partner insti
 
 For local demo use only, the seeded accounts are:
 
-- Admin: `sara@hemalink.org` / `Admin@123`
-- Central City Hospital: `hamza@centralcityhospital.org` / `Hospital@123`
-- Alkhidmat Welfare Centre: `ayesha@alkhidmat.org` / `Partner@123`
+- Admin: `demo_admin@hemalink.com` / `DemoAdmin@123`
+- Central City Hospital: `demo_hospital@hemalink.com` / `DemoHospital@123`
+- Alkhidmat Welfare Centre: `demo_partner@hemalink.com` / `DemoPartner@123`
 
 These passwords exist only in mock seed data and must be replaced by the backend authentication system.
 

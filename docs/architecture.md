@@ -1,10 +1,10 @@
-# Frontend Architecture & Technical Stack
+# BloodBridge Frontend Architecture & Technical Stack
 
 ## 1. Technology Stack
 
 - **Framework:** React 18+ (Vite SPA template)
 - **Language:** TypeScript / JavaScript (ESNext)
-- **Styling:** Tailwind CSS (configured with HemaLink Red & White tokens)
+- **Styling:** Tailwind CSS (configured with BloodBridge red and white tokens)
 - **UI Components:** shadcn/ui (Radix UI primitives)
 - **Icons:** Lucide React
 - **Routing:** React Router v6
@@ -18,7 +18,7 @@
 ```text
 src/
 ├── assets/
-│   ├── hemalink-logo.svg / hemalink-logo.png
+│   ├── bloodbridge-logo.svg / bloodbridge-logo.png
 │   └── icons/
 ├── components/
 │   ├── common/

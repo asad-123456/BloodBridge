@@ -1,10 +1,13 @@
 import type {
   AuditEvent,
   BloodRequest,
+  FulfillmentRecord,
   Institution,
   SafetyFlag,
   User,
 } from "../types";
+
+export const demoUserIds = ["usr-admin", "usr-hospital", "usr-partner"];
 
 export const seedUsers: User[] = [
   {
@@ -12,8 +15,8 @@ export const seedUsers: User[] = [
     name: "Sara Khan",
     role: "Admin",
     phone: "+92 300 555 0101",
-    email: "sara@hemalink.org",
-    password: "Admin@123",
+    email: "demo_admin@hemalink.com",
+    password: "DemoAdmin@123",
     isActive: true,
     createdAt: "2026-08-01",
   },
@@ -22,8 +25,8 @@ export const seedUsers: User[] = [
     name: "Dr. Hamza Ali",
     role: "Hospital",
     phone: "+92 321 555 0144",
-    email: "hamza@centralcityhospital.org",
-    password: "Hospital@123",
+    email: "demo_hospital@hemalink.com",
+    password: "DemoHospital@123",
     institutionId: "inst-central",
     isActive: true,
     createdAt: "2026-08-03",
@@ -33,8 +36,8 @@ export const seedUsers: User[] = [
     name: "Ayesha Malik",
     role: "Partner",
     phone: "+92 333 555 0192",
-    email: "ayesha@alkhidmat.org",
-    password: "Partner@123",
+    email: "demo_partner@hemalink.com",
+    password: "DemoPartner@123",
     institutionId: "inst-alkhidmat",
     isActive: true,
     createdAt: "2026-08-05",
@@ -165,6 +168,17 @@ export const seedRequests: BloodRequest[] = [
     trustLabel: "Partner fulfillment",
     fulfilledByInstitutionId: "inst-alkhidmat",
     createdAt: "2026-08-22T09:00:00Z",
+  },
+];
+export const seedFulfillments: FulfillmentRecord[] = [
+  {
+    id: "fulfillment-1003",
+    requestId: "req-1003",
+    institutionId: "inst-alkhidmat",
+    staffUserId: "usr-partner",
+    units: 2,
+    status: "Claimed",
+    createdAt: "2026-08-26T08:30:00Z",
   },
 ];
 export const seedSafetyFlags: SafetyFlag[] = [

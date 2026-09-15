@@ -6,13 +6,17 @@ import {
   HeartPulse,
   LayoutDashboard,
   ListChecks,
+  RotateCcw,
   Settings,
   Users,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../context/useAuth";
+import { demoUserIds } from "../../utils/mockData";
 const navigation = {
   admin: [
     { label: "Overview", path: "/admin", icon: LayoutDashboard },
+    { label: "Registered users", path: "/admin/users", icon: Users },
     { label: "Approvals", path: "/admin/approvals", icon: Users },
     { label: "Requests", path: "/admin/requests", icon: ListChecks },
     { label: "Safety flags", path: "/admin/flags", icon: Flag },
@@ -45,6 +49,14 @@ const navigation = {
   ],
 };
 export function AppSidebar({ role }: { role: keyof typeof navigation }) {
+  const { user } = useAuth();
+  const isDemoUser = user ? demoUserIds.includes(user.id) : false;
+  const resetDemo = () => {
+    window.localStorage.removeItem("hemalink-mock-state");
+    window.sessionStorage.removeItem("hemalink-auth-session");
+    window.location.reload();
+  };
+
   return (
     <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white p-4 lg:block">
       <div className="mb-7 px-3">
@@ -70,12 +82,19 @@ export function AppSidebar({ role }: { role: keyof typeof navigation }) {
           </NavLink>
         ))}
       </nav>
-      <div className="mt-10 rounded-xl bg-slate-50 p-4">
+      {isDemoUser && <div className="mt-10 rounded-xl bg-slate-50 p-4">
         <p className="text-xs font-bold text-slate-700">Frontend demo mode</p>
         <p className="mt-1 text-xs leading-5 text-slate-500">
-          Changes are stored in this browser session.
+          Changes are stored in this browser until the demo is reset.
         </p>
-      </div>
+        <button
+          type="button"
+          onClick={resetDemo}
+          className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-primary hover:text-primary-hover"
+        >
+          <RotateCcw size={14} /> Reset demo data
+        </button>
+      </div>}
     </aside>
   );
 }

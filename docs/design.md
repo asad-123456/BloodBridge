@@ -1,8 +1,8 @@
 # Design System & UI Specifications
 
-## 1. Visual Brand & Theme (HemaLink Aesthetic)
+## 1. Visual Brand & Theme (BloodBridge Aesthetic)
 
-- **Primary Brand Color:** HemaLink Crimson Red (`#E10600` / `#DC2626`)
+- **Primary Brand Color:** BloodBridge Crimson Red (`#E10600` / `#DC2626`)
 - **Primary Hover/Dark:** Deep Blood Red (`#B91C1C` / `#991B1B`)
 - **Primary Subtle / Tint:** Crimson Light Tint (`#FEF2F2`)
 - **Background:** Crisp Off-White / Gray 50 (`#F8FAFC` / `#FFFFFF`)
@@ -33,7 +33,7 @@
 
 ### 3.1 App Header & Branding
 
-- Displays the **HemaLink logo** (Red droplet glyph + bold typography) on the top-left.
+- Displays the **BloodBridge logo** (Red droplet glyph + bold typography) on the top-left.
 - Right section features a **Portal Switcher Dropdown** (`Admin Portal`, `Hospital Portal`, `Partner Portal`) for easy evaluator demonstrations, user profile avatar, and notifications bell.
 
 ### 3.2 Sidebar Navigation

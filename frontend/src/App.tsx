@@ -1,18 +1,17 @@
 import { ArrowRight, Building2, HeartPulse, ShieldCheck } from "lucide-react";
 import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
 import { AppStateProvider } from "./context/AppStateContext";
-import { useAppState } from "./context/useAppState";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/useAuth";
 import type { PortalRole } from "./context/authContextValue";
-import { PartnerPages } from "./pages/partner/PartnerPages";
+import { PartnerRoutes } from "./pages/partner/PartnerRoutes";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { HospitalLayout } from "./layouts/HospitalLayout";
 import { PartnerLayout } from "./layouts/PartnerLayout";
 import type { ReactNode } from "react";
-import { HospitalPages } from "./pages/hospital/HospitalPages";
+import { HospitalRoutes } from "./pages/hospital/HospitalRoutes";
 import { PortalLogin } from "./pages/auth/PortalLogin";
-import { AdminPages } from "./pages/admin/AdminPages";
+import { AdminRoutes } from "./pages/admin/AdminRoutes";
 
 function PortalSelection() {
   const portals = [
@@ -50,18 +49,18 @@ function PortalSelection() {
           <Link
             to="/"
             className="flex items-center gap-3"
-            aria-label="HemaLink home"
+            aria-label="BloodBridge home"
           >
             <img
-              src="/hemalink-icon.png"
+              src="/bloodbridge-icon.png"
               alt=""
               className="size-12 rounded-xl object-contain"
             />
-            <img
-              src="/hemalink-logo.jpg"
-              alt="HemaLink"
+            {/* <img
+              src="/bloodbridge-logo.jpg"
+              alt="BloodBridge"
               className="h-10 w-40 object-contain object-left"
-            />
+            /> */}
           </Link>
           <div className="hidden items-center gap-3 sm:flex">
             <span className="h-8 w-px bg-slate-200" />
@@ -77,7 +76,7 @@ function PortalSelection() {
               Blood connection, made accountable
             </p>
             <h1 className="max-w-xl text-4xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-5xl">
-              Choose your HemaLink workspace.
+              Choose your BloodBridge workspace.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
               A single network for verified hospitals, trusted institutions, and
@@ -119,8 +118,8 @@ function PortalSelection() {
           </div>
         </main>
         <footer className="flex flex-col gap-2 border-t border-slate-200 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <span>Secure role-based access</span>
-          <span>Frontend demo environment</span>
+          <span></span>
+          <span></span>
         </footer>
       </div>
     </div>
@@ -150,11 +149,7 @@ function ProtectedPortal({
   children: ReactNode;
 }) {
   const { user, logout } = useAuth();
-  const { users } = useAppState();
-  const currentUser = user
-    ? users.find((item) => item.id === user.id)
-    : undefined;
-  if (!user || !currentUser?.isActive) {
+  if (!user || !user.isActive) {
     if (user) logout();
     return <Navigate to={`/${role.toLowerCase()}/login`} replace />;
   }
@@ -175,7 +170,7 @@ function AppRoutes() {
           <ProtectedPortal role="Admin">
             <Shell role="admin">
               <Routes>
-                <Route path="*" element={<AdminPages />} />
+                <Route path="*" element={<AdminRoutes />} />
               </Routes>
             </Shell>
           </ProtectedPortal>
@@ -187,7 +182,7 @@ function AppRoutes() {
           <ProtectedPortal role="Hospital">
             <Shell role="hospital">
               <Routes>
-                <Route path="*" element={<HospitalPages />} />
+                <Route path="*" element={<HospitalRoutes />} />
               </Routes>
             </Shell>
           </ProtectedPortal>
@@ -199,7 +194,7 @@ function AppRoutes() {
           <ProtectedPortal role="Partner">
             <Shell role="partner">
               <Routes>
-                <Route path="*" element={<PartnerPages />} />
+                <Route path="*" element={<PartnerRoutes />} />
               </Routes>
             </Shell>
           </ProtectedPortal>
@@ -208,14 +203,22 @@ function AppRoutes() {
     </Routes>
   );
 }
+
+function AppStateBoundary() {
+  const { user } = useAuth();
+  return (
+    <AppStateProvider key={user?.id ?? "logged-out"}>
+      <AppRoutes />
+    </AppStateProvider>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <AppStateProvider>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </AppStateProvider>
+      <AuthProvider>
+        <AppStateBoundary />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

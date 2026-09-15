@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Droplet, LockKeyhole } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAppState } from "../../context/useAppState";
 import { useAuth } from "../../context/useAuth";
+import { demoUserIds, seedUsers } from "../../utils/mockData";
 import type { PortalRole } from "../../context/authContextValue";
 
 const config: Record<
@@ -34,30 +34,50 @@ const config: Record<
   },
 };
 
+const demoCredentials: Record<
+  PortalRole,
+  { email: string; password: string }
+> = {
+  Admin: { email: "demo_admin@hemalink.com", password: "DemoAdmin@123" },
+  Hospital: {
+    email: "demo_hospital@hemalink.com",
+    password: "DemoHospital@123",
+  },
+  Partner: {
+    email: "demo_partner@hemalink.com",
+    password: "DemoPartner@123",
+  },
+};
+
 export function PortalLogin({ role }: { role: PortalRole }) {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const { users } = useAppState();
+  const { login, loginWithBackend } = useAuth();
   const settings = config[role];
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const demoAccount = demoCredentials[role];
+  const [email, setEmail] = useState(demoAccount.email);
+  const [password, setPassword] = useState(demoAccount.password);
   const [error, setError] = useState("");
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
-    const found = users.find(
-      (user) =>
-        user.role === settings.type &&
-        user.isActive &&
-        user.email.toLowerCase() === email.trim().toLowerCase() &&
-        user.password === password,
-    );
-    if (!found) {
-      setError("The email or password is not valid.");
-      return;
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const demoUser = seedUsers.find(
+        (candidate) =>
+          demoUserIds.includes(candidate.id) &&
+          candidate.role === settings.type &&
+          candidate.email.toLowerCase() === normalizedEmail &&
+          candidate.password === password,
+      );
+      if (demoUser) {
+        login(role, demoUser);
+      } else {
+        await loginWithBackend(role, normalizedEmail, password);
+      }
+      setError("");
+      navigate(settings.destination);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The email or password is not valid.");
     }
-    setError("");
-    login(role, found);
-    navigate(settings.destination);
   };
   return (
     <div className="grid min-h-screen place-items-center bg-slate-50 p-5">
@@ -67,7 +87,7 @@ export function PortalLogin({ role }: { role: PortalRole }) {
             <Droplet size={21} fill="currentColor" />
           </span>
           <span className="text-xl font-extrabold tracking-tight text-slate-950">
-            Hema<span className="text-primary">Link</span>
+            Blood<span className="text-primary">Bridge</span>
           </span>
         </div>
         <p className="mb-2 text-sm font-bold text-primary">Secure access</p>
@@ -77,6 +97,29 @@ export function PortalLogin({ role }: { role: PortalRole }) {
         <p className="mt-2 text-sm leading-6 text-slate-500">
           {settings.subtitle}
         </p>
+        {role !== "Admin" && (
+          <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+            Need to register an account? Contact a BloodBridge admin at{" "}
+            <a
+              href="mailto:admin@hemalink.com"
+              className="font-bold text-primary hover:underline"
+            >
+              admin@hemalink.com
+            </a>
+            .
+          </p>
+        )}
+        <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber-700">
+            Demo mode
+          </p>
+          <p className="mt-2 text-xs text-slate-700">
+            Email: <span className="font-bold">{demoAccount.email}</span>
+          </p>
+          <p className="text-xs text-slate-700">
+            Password: <span className="font-bold">{demoAccount.password}</span>
+          </p>
+        </div>
         <form onSubmit={submit} className="mt-7 space-y-4">
           <label className="block text-sm font-bold text-slate-700">
             Registered email
