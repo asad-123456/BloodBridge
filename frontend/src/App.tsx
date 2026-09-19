@@ -56,11 +56,6 @@ function PortalSelection() {
               alt=""
               className="size-12 rounded-xl object-contain"
             />
-            {/* <img
-              src="/bloodbridge-logo.jpg"
-              alt="BloodBridge"
-              className="h-10 w-40 object-contain object-left"
-            /> */}
           </Link>
           <div className="hidden items-center gap-3 sm:flex">
             <span className="h-8 w-px bg-slate-200" />
@@ -213,12 +208,15 @@ function AppStateBoundary() {
   );
 }
 
+import { Toaster } from "react-hot-toast";
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <AppStateBoundary />
       </AuthProvider>
+      <Toaster position="top-center" toastOptions={{ duration: 4000, style: { fontSize: '14px', borderRadius: '10px' } }} />
     </BrowserRouter>
   );
 }

@@ -89,7 +89,7 @@ app.include_router(organizations_router)
 app.include_router(admin_router)
 app.include_router(blood_requests_router)
 app.include_router(request_matches_router)
-app.include_router(inventory_router, prefix="/api/v1")
+app.include_router(inventory_router)
 app.include_router(chat_router)
 
 

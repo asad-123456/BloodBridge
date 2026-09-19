@@ -1,0 +1,66 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgis/postgis:15-3.4
+    container_name: bloodbridge-db
+    restart: always
+    environment:
+      POSTGRES_DB: bloodbridge
+      # Using standard default credentials for the containerized environment
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - bloodbridge_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bloodbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bloodbridge-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      # Connection string points to the 'db' service alias within the Docker network
+      DATABASE_URL: postgresql://postgres:password@db:5432/bloodbridge
+      FRONTEND_URL: http://localhost:5173
+      JWT_SECRET_KEY: dev_secret_key_change_in_production
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bloodbridge-frontend
+    restart: always
+    ports:
+      # Exposing the Nginx server running inside the container on port 5173
+      - "5173:80"
+    depends_on:
+      - backend
+
+  # Optional database viewer
+  adminer:
+    image: adminer
+    container_name: bloodbridge-adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+volumes:
+  bloodbridge_data:
+

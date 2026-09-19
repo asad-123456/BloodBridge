@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, Index, String
+from sqlalchemy import Boolean, Column, DateTime, Enum, Index, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -36,6 +36,8 @@ class Donor(Base):
 
     is_email_verified = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
+    eligible_after = Column(DateTime(timezone=True), nullable=True)
+    reliability_score = Column(Integer, default=100, nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

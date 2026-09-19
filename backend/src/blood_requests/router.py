@@ -13,7 +13,7 @@ from src.organizations.controller import get_current_organization
 from src.organizations.models import Organization
 from src.utils.auth import Identity, get_current_identity
 from src.utils.database import get_db
-from src.utils.enums import RequestStatus
+from src.utils.enums import MatchStatus, RequestStatus
 
 router = APIRouter(prefix="/blood-requests", tags=["blood_requests"])
 
@@ -38,30 +38,6 @@ def list_nearby_for_donor(donor: Donor = Depends(get_current_donor), db: Session
 @router.get("/hospital/pending", response_model=list[dtos.BloodRequestOut])
 def list_pending_for_hospital(hospital: Hospital = Depends(get_current_hospital), db: Session = Depends(get_db)):
     return controller.list_pending_for_hospital(hospital, db)
-
-
-@router.post("/{request_id}/verify", response_model=dtos.BloodRequestOut)
-def verify_request_by_hospital(
-    request_id: str,
-    hospital: Hospital = Depends(get_current_hospital),
-    db: Session = Depends(get_db),
-):
-    blood_request = controller.get_request(request_id, db)
-    if blood_request.hospital_id != hospital.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot verify requests for another hospital facility.",
-        )
-    if blood_request.status != RequestStatus.PENDING_VERIFICATION:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Request is not pending verification.",
-        )
-
-    blood_request.status = RequestStatus.ACTIVE
-    db.commit()
-    db.refresh(blood_request)
-    return blood_request
 
 
 @router.post("/{request_id}/fulfill", response_model=dict)
@@ -98,7 +74,7 @@ def fulfill_request_by_partner(
     existing_claim = db.query(RequestMatch).filter(
         RequestMatch.blood_request_id == blood_request.id,
         RequestMatch.organization_id == organization.id,
-        RequestMatch.status == __import__("src.utils.enums", fromlist=["MatchStatus"]).MatchStatus.ACCEPTED,
+        RequestMatch.status == MatchStatus.ACCEPTED,
     ).first()
     if existing_claim:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Your institution already has an open claim for this request.")
@@ -108,7 +84,7 @@ def fulfill_request_by_partner(
         blood_request_id=blood_request.id,
         organization_id=organization.id,
         units_committed=payload.units_to_fulfill,
-        status=__import__("src.utils.enums", fromlist=["MatchStatus"]).MatchStatus.ACCEPTED,
+        status=MatchStatus.ACCEPTED,
     )
     db.add(match)
     blood_request.units_secured = min(

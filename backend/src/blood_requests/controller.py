@@ -229,6 +229,9 @@ def list_nearby_for_donor(donor: Donor, db: Session) -> list[dtos.NearbyBloodReq
             detail="Set your availability location before browsing nearby requests",
         )
 
+    if donor.eligible_after and donor.eligible_after > datetime.now(timezone.utc):
+        return []
+
     compatible_recipients = [
         recipient
         for recipient, donor_types in COMPATIBLE_DONORS_FOR_RECIPIENT.items()

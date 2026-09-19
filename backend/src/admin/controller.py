@@ -7,6 +7,7 @@ from src.organizations.models import Organization
 from src.donors.models import Donor
 from src.requestors.models import Requestor
 from src.admin.activity_models import AuditEvent, SafetyFlag
+from src.blood_requests.models import BloodRequest
 from src.request_matches.models import RequestMatch
 from src.utils.auth import require_roles
 from src.utils.enums import ApprovalStatus

@@ -20,6 +20,15 @@ body {
   margin: 0;
 }
 
+@layer base {
+  button {
+    @apply transition-transform duration-100;
+  }
+  button:not(:disabled):active {
+    @apply scale-[0.97];
+  }
+}
+
 button,
 select {
   font: inherit;

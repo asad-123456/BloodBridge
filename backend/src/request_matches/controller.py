@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -74,6 +74,8 @@ def cancel_match(match_id: str, data: dtos.MatchCancel, db: Session, identity: I
     try:
         match.status = MatchStatus.CANCELLED
         match.cancel_reason = data.reason
+        if identity.role == "donor":
+            identity.entity.reliability_score -= 10
         # Reopens the parent request for other donors/orgs to respond to.
         blood_requests_controller.release_units(blood_request, match.units_committed, db)
         db.commit()
@@ -94,6 +96,8 @@ def complete_match(match_id: str, db: Session, identity: Identity) -> RequestMat
     try:
         match.status = MatchStatus.COMPLETED
         match.completed_at = datetime.now(timezone.utc)
+        if identity.role == "donor":
+            identity.entity.eligible_after = datetime.now(timezone.utc) + timedelta(days=90)
         db.flush()
         # Once no commitment is outstanding and the target is met, the request
         # is genuinely FULFILLED rather than merely FULLY_MATCHED.

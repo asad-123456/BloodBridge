@@ -19,7 +19,8 @@ from src.blood_requests.models import BloodRequest
 from src.donors.models import Donor
 from src.request_matches.models import RequestMatch
 from src.utils.constants import COMPATIBLE_DONORS_FOR_RECIPIENT, OPEN_STATUSES
-from src.utils.enums import MatchStatus
+from src.utils.enums import MatchStatus, UrgencyLevel
+from sqlalchemy.sql import func
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,8 @@ def find_donors_to_notify(blood_request: BloodRequest, db: Session) -> list[Dono
         return []
     if blood_request.location is None:
         return []
+    if blood_request.urgency_level == UrgencyLevel.ROUTINE:
+        return []
 
     compatible_donor_types = COMPATIBLE_DONORS_FOR_RECIPIENT[blood_request.blood_type_needed]
 
@@ -59,6 +62,7 @@ def find_donors_to_notify(blood_request: BloodRequest, db: Session) -> list[Dono
         db.query(Donor)
         .filter(Donor.device_token.isnot(None))
         .filter(Donor.is_active.is_(True))
+        .filter(Donor.eligible_after.is_(None) | (Donor.eligible_after <= func.now()))
         .filter(Donor.location.isnot(None))
         .filter(Donor.blood_type.in_(compatible_donor_types))
         .filter(

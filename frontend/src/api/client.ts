@@ -97,7 +97,7 @@ type BackendBloodRequest = {
   created_at: string;
 };
 
-export async function getHospitalPendingRequests(token: string) {
+export async function getHospitalPendingRequests(token: string): Promise<BloodRequest[]> {
   const requests = await request<BackendBloodRequest[]>("/blood-requests/hospital/pending", {}, token);
   return requests.map((item) => ({
     id: item.id,
@@ -118,8 +118,8 @@ export async function getHospitalPendingRequests(token: string) {
   }));
 }
 
-export function verifyHospitalRequest(token: string, requestId: string, approve: boolean) {
-  return request(`/blood-requests/${requestId}/hospital-verify?approve=${approve}`, { method: "PATCH" }, token);
+export function verifyHospitalRequest(token: string, requestId: string, approve: boolean): Promise<BackendBloodRequest> {
+  return request<BackendBloodRequest>(`/blood-requests/${requestId}/hospital-verify?approve=${approve}`, { method: "PATCH" }, token);
 }
 
 type PartnerRequestResponse = BackendBloodRequest & { area_label: string | null };
@@ -134,7 +134,7 @@ type PartnerFulfillmentResponse = {
   confirmed_at: string | null;
 };
 
-function mapPartnerRequest(item: PartnerRequestResponse) {
+function mapPartnerRequest(item: PartnerRequestResponse): BloodRequest {
   const urgency: Record<string, UrgencyLevel> = { critical: "Urgent", urgent: "Today", routine: "Routine" };
   const statuses: Record<string, BloodRequest["status"]> = { active: "Active", partially_matched: "Matched / In progress", fully_matched: "Matched / In progress", fulfilled: "Fulfilled", pending_verification: "Pending hospital verification" };
   return {
@@ -156,15 +156,15 @@ function mapPartnerRequest(item: PartnerRequestResponse) {
   };
 }
 
-export function getPartnerExternalRequests(token: string) {
+export function getPartnerExternalRequests(token: string): Promise<BloodRequest[]> {
   return request<PartnerRequestResponse[]>("/organizations/requests/external", {}, token).then((items) => items.map(mapPartnerRequest));
 }
 
-export function getPartnerOwnRequests(token: string) {
+export function getPartnerOwnRequests(token: string): Promise<BloodRequest[]> {
   return request<PartnerRequestResponse[]>("/organizations/requests/mine", {}, token).then((items) => items.map(mapPartnerRequest));
 }
 
-export function getPartnerFulfillments(token: string) {
+export function getPartnerFulfillments(token: string): Promise<import("../types").FulfillmentRecord[]> {
   return request<PartnerFulfillmentResponse[]>("/organizations/fulfillments", {}, token).then((items) => items.map((item) => ({
     id: item.id,
     requestId: item.blood_request_id,
@@ -178,24 +178,24 @@ export function getPartnerFulfillments(token: string) {
   })));
 }
 
-export function fulfillFromStockApi(token: string, requestId: string, units: number) {
+export function fulfillFromStockApi(token: string, requestId: string, units: number): Promise<unknown> {
   return request(`/blood-requests/${requestId}/fulfill`, { method: "POST", body: JSON.stringify({ units_to_fulfill: units, component_type: "Whole Blood" }) }, token);
 }
 
-export function createPartnerRequest(token: string, data: { blood_type_needed: string; units_needed: number; urgency_level: string; required_by: string; hospital_name?: string; area_label?: string }) {
+export function createPartnerRequest(token: string, data: { blood_type_needed: string; units_needed: number; urgency_level: string; required_by: string; hospital_name?: string; area_label?: string }): Promise<BloodRequest> {
   return request<PartnerRequestResponse>("/organizations/requests", { method: "POST", body: JSON.stringify(data) }, token).then(mapPartnerRequest);
 }
 
-export function updatePartnerFulfillment(token: string, fulfillmentId: string, action: "handover" | "confirm") {
+export function updatePartnerFulfillment(token: string, fulfillmentId: string, action: "handover" | "confirm"): Promise<PartnerFulfillmentResponse> {
   return request<PartnerFulfillmentResponse>(`/organizations/fulfillments/${fulfillmentId}/${action}`, { method: "PATCH" }, token);
 }
 
-export function getPartnerInventory(token: string) {
-  return request<Array<{ id: string; blood_group: import("../types").BloodGroup; component_type: string; units_available: number; last_updated: string }>>("/api/v1/inventory", {}, token).then((items) => items.map((item): InventoryItem => ({ id: item.id, bloodGroup: item.blood_group, componentType: item.component_type, unitsAvailable: item.units_available, lastUpdated: item.last_updated })));
+export function getPartnerInventory(token: string): Promise<InventoryItem[]> {
+  return request<Array<{ id: string; blood_group: import("../types").BloodGroup; component_type: string; units_available: number; last_updated: string }>>("/inventory", {}, token).then((items) => items.map((item): InventoryItem => ({ id: item.id, bloodGroup: item.blood_group, componentType: item.component_type, unitsAvailable: item.units_available, lastUpdated: item.last_updated })));
 }
 
-export function updatePartnerInventory(token: string, bloodGroup: string, componentType: string, units: number) {
-  return request("/api/v1/inventory/update", { method: "POST", body: JSON.stringify({ blood_group: bloodGroup, component_type: componentType, units }) }, token);
+export function updatePartnerInventory(token: string, bloodGroup: string, componentType: string, units: number): Promise<unknown> {
+  return request("/inventory/update", { method: "POST", body: JSON.stringify({ blood_group: bloodGroup, component_type: componentType, units }) }, token);
 }
 
 type AdminUserResponse = {
@@ -220,7 +220,7 @@ export async function updateAdminUserStatus(
   token: string,
   user: User,
   isActive: boolean,
-) {
+): Promise<User> {
   if (user.role === "Admin") {
     throw new Error("Administrator accounts cannot be changed here.");
   }
@@ -240,14 +240,14 @@ export async function updateAdminUserStatus(
   } satisfies User;
 }
 
-export function decideHospital(token: string, id: string, approve: boolean) {
+export function decideHospital(token: string, id: string, approve: boolean): Promise<unknown> {
   return request(`/admin/hospitals/${id}/decision`, {
     method: "PATCH",
     body: JSON.stringify({ approve }),
   }, token);
 }
 
-export function decideOrganization(token: string, id: string, approve: boolean) {
+export function decideOrganization(token: string, id: string, approve: boolean): Promise<unknown> {
   return request(`/admin/organizations/${id}/decision`, {
     method: "PATCH",
     body: JSON.stringify({ approve }),
