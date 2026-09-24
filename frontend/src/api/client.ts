@@ -86,7 +86,7 @@ type BackendBloodRequest = {
   id: string;
   donor_id: string | null;
   organization_id: string | null;
-  blood_type_needed: import("../types").BloodGroup;
+  blood_type_needed: import("../types").BloodType;
   units_needed: number;
   units_secured: number;
   urgency_level: import("../types").UrgencyLevel;
@@ -113,7 +113,20 @@ export async function getHospitalPendingRequests(token: string): Promise<BloodRe
     unitsRemaining: Math.max(0, item.units_needed - item.units_secured),
     urgency: item.urgency_level,
     requiredBy: item.required_by,
-    status: item.status === "pending_verification" ? "Pending hospital verification" as const : item.status as import("../types").RequestStatus,
+    status: (
+        {
+          draft: "Draft",
+          pending_verification: "Pending hospital verification",
+          active: "Active",
+          partially_matched: "Matched / In progress",
+            fully_matched: "Matched / In progress",
+          fulfilled: "Fulfilled",
+          closed: "Closed",
+          cancelled: "Cancelled",
+          expired: "Expired",
+          rejected: "Closed"
+        }[item.status] || "Active"
+      ) as import("../types").RequestStatus,
     trustLabel: item.is_hospital_backed ? "Institution-backed" as const : "Self-verified" as const,
     shortNote: "Live request from the BloodBridge API.",
     createdAt: item.created_at,
@@ -138,7 +151,8 @@ type PartnerFulfillmentResponse = {
 
 function mapPartnerRequest(item: PartnerRequestResponse): BloodRequest {
   const urgency: Record<string, UrgencyLevel> = { critical: "Urgent", urgent: "Today", routine: "Routine" };
-  const statuses: Record<string, BloodRequest["status"]> = { active: "Active", partially_matched: "Matched / In progress", fully_matched: "Matched / In progress", fulfilled: "Fulfilled", pending_verification: "Pending hospital verification" };
+  const statuses: Record<string, BloodRequest["status"]> = { draft: "Draft", pending_verification: "Pending hospital verification", active: "Active", partially_matched: "Matched / In progress",
+            fully_matched: "Matched / In progress", fulfilled: "Fulfilled", closed: "Closed", cancelled: "Cancelled", expired: "Expired", rejected: "Closed" };
   return {
     id: item.id,
     requesterId: item.organization_id ?? item.donor_id ?? "",
@@ -193,11 +207,11 @@ export function updatePartnerFulfillment(token: string, fulfillmentId: string, a
 }
 
 export function getPartnerInventory(token: string): Promise<InventoryItem[]> {
-  return request<Array<{ id: string; blood_group: import("../types").BloodGroup; component_type: string; units_available: number; last_updated: string }>>("/inventory", {}, token).then((items) => items.map((item): InventoryItem => ({ id: item.id, bloodGroup: item.blood_group, componentType: item.component_type, unitsAvailable: item.units_available, lastUpdated: item.last_updated })));
+  return request<Array<{ id: string; blood_type_needed: import("../types").BloodType; component_type: string; units_available: number; last_updated: string }>>("/inventory", {}, token).then((items) => items.map((item): InventoryItem => ({ id: item.id, bloodGroup: item.blood_type_needed, componentType: item.component_type, unitsAvailable: item.units_available, lastUpdated: item.last_updated })));
 }
 
 export function updatePartnerInventory(token: string, bloodGroup: string, componentType: string, units: number): Promise<unknown> {
-  return request("/inventory/update", { method: "POST", body: JSON.stringify({ blood_group: bloodGroup, component_type: componentType, units }) }, token);
+  return request("/inventory/update", { method: "POST", body: JSON.stringify({ blood_type_needed: bloodGroup, component_type: componentType, units }) }, token);
 }
 
 type AdminUserResponse = {
@@ -290,7 +304,7 @@ export async function createBloodRequest(payload: any, token?: string) {
 }
 
 export async function getNearbyRequests(lat: number, lng: number, radius_km: number, token?: string) {
-  return request('/blood-requests/nearby?latitude=' + lat + '&longitude=' + lng + '&radius_km=' + radius_km, {
+  return request('/blood-requests/nearby/for-me?latitude=' + lat + '&longitude=' + lng + '&radius_km=' + radius_km, {
     method: 'GET',
   }, token);
 }

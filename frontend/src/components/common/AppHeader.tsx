@@ -6,14 +6,16 @@ import { useAuth } from "../../context/useAuth";
 export function AppHeader() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isDemo, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { requests, institutions } = useAppState();
   const [showNotifications, setShowNotifications] = useState(false);
   const portalName = location.pathname.startsWith("/admin")
     ? "Admin Portal"
     : location.pathname.startsWith("/hospital")
       ? "Hospital Portal"
-      : "Partner Portal";
+      : location.pathname.startsWith("/citizen")
+        ? "Citizen Portal"
+        : "Partner Portal";
   const notifications =
     user?.role === "Admin"
       ? [
@@ -24,9 +26,11 @@ export function AppHeader() {
         ? [
             `${requests.filter((item) => item.hospitalId === user.institutionId && item.status === "Pending hospital verification").length} requests awaiting your review`,
           ]
-        : [
-            `${requests.filter((item) => ["Pending hospital verification", "Active"].includes(item.status) && item.requesterId !== user?.id && item.unitsRemaining > 0).length} requests available to fulfill`,
-          ];
+        : user?.role === "Citizen"
+          ? []
+          : [
+              `${requests.filter((item) => ["Pending hospital verification", "Active"].includes(item.status) && item.requesterId !== user?.id && item.unitsRemaining > 0).length} requests available to fulfill`,
+            ];
   return (
     <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-5 lg:px-8">
       <button
@@ -47,11 +51,6 @@ export function AppHeader() {
           <p className="text-xs font-bold text-slate-800">{user?.name}</p>
           <p className="text-[11px] text-slate-500">{portalName}</p>
         </div>
-        {isDemo && (
-          <span className="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-amber-700">
-            Demo mode
-          </span>
-        )}
         <div className="relative">
           <button
             onClick={() => setShowNotifications((visible) => !visible)}

@@ -28,7 +28,7 @@ def upgrade() -> None:
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('phone', sa.String(), nullable=False),
     sa.Column('password_hash', sa.String(), nullable=False),
-    sa.Column('blood_type', sa.Enum('O_POS', 'O_NEG', 'A_POS', 'A_NEG', 'B_POS', 'B_NEG', 'AB_POS', 'AB_NEG', name='blood_type'), nullable=False),
+    sa.Column('blood_type_needed', sa.Enum('O_POS', 'O_NEG', 'A_POS', 'A_NEG', 'B_POS', 'B_NEG', 'AB_POS', 'AB_NEG', name='blood_type_needed'), nullable=False),
     sa.Column('profile_pic_url', sa.String(), nullable=True),
     sa.Column('location', Geography(geometry_type='POINT', srid=4326, dimension=2, spatial_index=False, from_text='ST_GeogFromText', name='geography'), nullable=True),
     sa.Column('area_label', sa.String(), nullable=True),

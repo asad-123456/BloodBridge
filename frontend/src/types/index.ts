@@ -1,4 +1,4 @@
-export type BloodGroup =
+export type BloodType =
   "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
 export type UrgencyLevel = "Routine" | "Today" | "Urgent";
 export type TrustLabel =
@@ -50,7 +50,7 @@ export interface BloodRequest {
   hospitalId?: string;
   hospitalName: string;
   isHospitalRegistered: boolean;
-  bloodGroup: BloodGroup;
+  bloodGroup: BloodType;
   unitsRequired: number;
   unitsFulfilled: number;
   unitsRemaining: number;
@@ -77,7 +77,7 @@ export interface FulfillmentRecord {
 }
 export interface InventoryItem {
   id: string;
-  bloodGroup: BloodGroup;
+  bloodGroup: BloodType;
   componentType: string;
   unitsAvailable: number;
   lastUpdated: string;

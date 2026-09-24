@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import uuid
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 
 from src.admin.controller import get_current_admin
@@ -32,8 +33,14 @@ def create_request(
 # even though a single-segment param wouldn't shadow them.
 
 @router.get("/nearby/for-me", response_model=list[dtos.NearbyBloodRequestOut])
-def list_nearby_for_donor(donor: Donor = Depends(get_current_donor), db: Session = Depends(get_db)):
-    return controller.list_nearby_for_donor(donor, db)
+def list_nearby_for_donor(
+    latitude: float,
+    longitude: float,
+    radius_km: float = 50.0,
+    donor: Donor = Depends(get_current_donor),
+    db: Session = Depends(get_db)
+):
+    return controller.list_nearby_for_donor(donor, latitude, longitude, radius_km, db)
 
 
 @router.get("/hospital/pending", response_model=list[dtos.BloodRequestOut])
@@ -43,7 +50,7 @@ def list_pending_for_hospital(hospital: Hospital = Depends(get_current_hospital)
 
 @router.post("/{request_id}/fulfill", response_model=dict)
 def fulfill_request_by_partner(
-    request_id: str,
+    request_id: uuid.UUID,
     payload: dtos.FulfillRequestDTO,
     organization: Organization = Depends(get_current_organization),
     db: Session = Depends(get_db),
@@ -104,7 +111,7 @@ def fulfill_request_by_partner(
 
 @router.get("/{request_id}", response_model=dtos.BloodRequestOut)
 def get_request(
-    request_id: str,
+    request_id: uuid.UUID,
     identity: Identity = Depends(get_current_identity),
     db: Session = Depends(get_db),
 ):
@@ -116,7 +123,7 @@ def get_request(
 
 @router.patch("/{request_id}/hospital-verify", response_model=dtos.BloodRequestOut)
 def hospital_verify(
-    request_id: str,
+    request_id: uuid.UUID,
     approve: bool,
     hospital: Hospital = Depends(get_current_hospital),
     db: Session = Depends(get_db),
@@ -126,7 +133,7 @@ def hospital_verify(
 
 @router.patch("/{request_id}/cancel", response_model=dtos.BloodRequestOut)
 def cancel_request(
-    request_id: str,
+    request_id: uuid.UUID,
     data: dtos.CancelRequest,
     poster: Identity = Depends(get_current_poster),
     db: Session = Depends(get_db),
@@ -136,7 +143,7 @@ def cancel_request(
 
 @router.patch("/{request_id}/widen-radius", response_model=dtos.BloodRequestOut)
 def widen_radius(
-    request_id: str,
+    request_id: uuid.UUID,
     data: dtos.WidenRadiusRequest,
     poster: Identity = Depends(get_current_poster),
     db: Session = Depends(get_db),
@@ -146,7 +153,7 @@ def widen_radius(
 
 @router.patch("/{request_id}/reactivate", response_model=dtos.BloodRequestOut)
 def reactivate_request(
-    request_id: str,
+    request_id: uuid.UUID,
     poster: Identity = Depends(get_current_poster),
     db: Session = Depends(get_db),
 ):
@@ -155,7 +162,7 @@ def reactivate_request(
 
 @router.post("/hospital/close/{request_id}", response_model=dtos.BloodRequestOut)
 def close_request_as_hospital(
-    request_id: str,
+    request_id: uuid.UUID,
     hospital: Hospital = Depends(get_current_hospital),
     db: Session = Depends(get_db),
 ):
@@ -164,7 +171,7 @@ def close_request_as_hospital(
 
 @router.post("/poster/close/{request_id}", response_model=dtos.BloodRequestOut)
 def close_request_as_poster(
-    request_id: str,
+    request_id: uuid.UUID,
     poster: Identity = Depends(get_current_poster),
     db: Session = Depends(get_db),
 ):

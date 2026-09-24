@@ -193,7 +193,7 @@ export function PortalSignup({ role }: { role: "Hospital" | "Partner" }) {
 
             <label className="block text-sm font-bold text-slate-700">
               Phone Number
-              <input
+              <input type="tel" pattern="^\+?[0-9\s\-]+$" title="Valid phone number (e.g. +92 300 1234567)"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required

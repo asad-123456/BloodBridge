@@ -35,3 +35,6 @@ frontend/.env.*
 
 # --- AI Agent Docs ---
 docs/agent-docs/
+
+.env.*
+.git

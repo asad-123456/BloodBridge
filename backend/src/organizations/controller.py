@@ -1,3 +1,4 @@
+from sqlalchemy.orm import selectinload
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, UploadFile, status
@@ -117,6 +118,7 @@ def update_fulfillment(match_id: str, org: Organization, action: str, db: Sessio
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Handover must be recorded first")
         match.confirmed_at = datetime.now(timezone.utc)
         match.status = MatchStatus.COMPLETED
+        blood_requests_controller.mark_fulfilled_if_complete(match.blood_request_id, db)
         match.completed_at = match.confirmed_at
     db.commit()
     db.refresh(match)

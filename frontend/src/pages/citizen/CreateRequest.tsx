@@ -22,7 +22,7 @@ function LocationMarker({ position, setPosition }: {
 }
 
 export function CreateRequest() {
-  const { accessToken, isDemo } = useAuth();
+  const { accessToken } = useAuth();
   const navigate = useNavigate();
   const [bloodType, setBloodType] = useState("O+");
   const [units, setUnits] = useState(1);
@@ -48,14 +48,7 @@ export function CreateRequest() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!position) return;
-        // --- DEMO MOCK LOGIC (EASILY DELETABLE) ---
-    if (isDemo) {
-      setTimeout(() => {
-        navigate("/citizen/my-requests");
-      }, 500);
-      return;
-    }
-    // ------------------------------------------
+        
 
     const dateObj = new Date(requiredBy);
     if (isNaN(dateObj.getTime())) {
@@ -104,34 +97,34 @@ export function CreateRequest() {
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-bold mb-1">Patient Name</label>
-              <input type="text" value={patientName} onChange={e => setPatientName(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+              <label htmlFor="patientName" className="block text-sm font-bold mb-1">Patient Name</label>
+              <input id="patientName" type="text" value={patientName} onChange={e => setPatientName(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1">Area Label (e.g. City Hospital)</label>
-              <input type="text" value={areaLabel} onChange={e => setAreaLabel(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+              <label htmlFor="areaLabel" className="block text-sm font-bold mb-1">Area Label (e.g. City Hospital)</label>
+              <input id="areaLabel" type="text" value={areaLabel} onChange={e => setAreaLabel(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1">Contact Phone</label>
-              <input type="text" value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+92 300 0000000" className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+              <label htmlFor="contactPhone" className="block text-sm font-bold mb-1">Contact Phone</label>
+              <input id="contactPhone" type="tel" pattern="^\+?[0-9\s\-]+$" title="Valid phone number (e.g. +92 300 1234567)" value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+92 300 0000000" className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1">Blood Type Needed</label>
-              <select value={bloodType} onChange={e => setBloodType(e.target.value)} className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none">
+              <label htmlFor="bloodType" className="block text-sm font-bold mb-1">Blood Type Needed</label>
+              <select id="bloodType" value={bloodType} onChange={e => setBloodType(e.target.value)} className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none">
                 {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bt => <option key={bt} value={bt}>{bt}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1">Units Needed</label>
-              <input type="number" min="1" value={units} onChange={e => setUnits(Number(e.target.value))} className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+              <label htmlFor="units" className="block text-sm font-bold mb-1">Units Needed</label>
+              <input id="units" type="number" min="1" value={units} onChange={e => setUnits(Number(e.target.value))} className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1">Required By</label>
-              <input type="datetime-local" value={requiredBy} onChange={e => setRequiredBy(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+              <label htmlFor="requiredBy" className="block text-sm font-bold mb-1">Required By</label>
+              <input id="requiredBy" type="datetime-local" value={requiredBy} onChange={e => setRequiredBy(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-1">Urgency</label>
-              <select value={urgency} onChange={e => setUrgency(e.target.value)} className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none">
+              <label htmlFor="urgency" className="block text-sm font-bold mb-1">Urgency</label>
+              <select id="urgency" value={urgency} onChange={e => setUrgency(e.target.value)} className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none">
                 <option value="routine">Routine</option>
                 <option value="urgent">Urgent</option>
                 <option value="critical">Critical</option>

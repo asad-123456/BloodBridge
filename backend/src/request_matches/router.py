@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/request-matches", tags=["request_matches"])
 @limiter.limit("20/minute")
 def accept_request(
     request: Request,
-    request_id: str,
+    request_id: uuid.UUID,
     data: dtos.MatchAccept,
     actor: Identity = Depends(get_current_acceptor),
     db: Session = Depends(get_db),
@@ -29,7 +30,7 @@ def list_my_matches(actor: Identity = Depends(get_current_acceptor), db: Session
 
 @router.patch("/{match_id}/eta", response_model=dtos.RequestMatchOut)
 def update_eta(
-    match_id: str,
+    match_id: uuid.UUID,
     data: dtos.MatchUpdateEta,
     actor: Identity = Depends(get_current_acceptor),
     db: Session = Depends(get_db),
@@ -39,7 +40,7 @@ def update_eta(
 
 @router.patch("/{match_id}/cancel", response_model=dtos.RequestMatchOut)
 def cancel_match(
-    match_id: str,
+    match_id: uuid.UUID,
     data: dtos.MatchCancel,
     actor: Identity = Depends(get_current_acceptor),
     db: Session = Depends(get_db),
@@ -49,7 +50,7 @@ def cancel_match(
 
 @router.patch("/{match_id}/complete", response_model=dtos.RequestMatchOut)
 def complete_match(
-    match_id: str,
+    match_id: uuid.UUID,
     actor: Identity = Depends(get_current_acceptor),
     db: Session = Depends(get_db),
 ):

@@ -41,18 +41,18 @@ export function AdminOverview() {
           {pending > 0 && (
             <Link to="/admin/approvals" className="flex items-center justify-between border-t border-slate-100 px-5 py-4 text-sm hover:bg-slate-50">
               <span><strong className="text-slate-900">{pending} institutions</strong> need registration review</span>
-              <ChevronRight size={17} className="text-slate-400" />
+              <ChevronRight size={17} className="text-slate-500" />
             </Link>
           )}
           {openFlags > 0 && (
             <Link to="/admin/flags" className="flex items-center justify-between border-t border-slate-100 px-5 py-4 text-sm hover:bg-slate-50">
               <span><strong className="text-slate-900">{openFlags} safety flags</strong> need attention</span>
-              <ChevronRight size={17} className="text-slate-400" />
+              <ChevronRight size={17} className="text-slate-500" />
             </Link>
           )}
           <Link to="/admin/requests" className="flex items-center justify-between border-t border-slate-100 px-5 py-4 text-sm hover:bg-slate-50">
             <span>Review request trust labels and lifecycle state</span>
-            <ChevronRight size={17} className="text-slate-400" />
+            <ChevronRight size={17} className="text-slate-500" />
           </Link>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm">

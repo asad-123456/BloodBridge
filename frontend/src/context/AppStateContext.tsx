@@ -10,82 +10,28 @@ import type {
   User,
   InventoryItem,
 } from "../types";
-import {
-  seedAuditEvents,
-  demoUserIds,
-  seedFulfillments,
-  seedInstitutions,
-  seedRequests,
-  seedSafetyFlags,
-  seedUsers,
-} from "../utils/mockData";
 import { useAuth } from "./useAuth";
 import { createPartnerRequest, fulfillFromStockApi, getAdminSnapshot, getHospitalPendingRequests, getPartnerExternalRequests, getPartnerFulfillments, getPartnerInventory, getPartnerOwnRequests, updatePartnerFulfillment, updateAdminUserStatus, verifyHospitalRequest as verifyHospitalRequestApi } from "../api/client";
 import { decideHospital, decideOrganization } from "../api/client";
 
 import { AppStateContext, type AppState } from "./appStateContextValue";
 const now = () => new Date().toISOString();
-const storageKey = "bloodbridge-mock-state";
-
-function readStoredState() {
-  try {
-    return JSON.parse(
-      window.localStorage.getItem(storageKey) ?? "null",
-    ) as Partial<AppState> | null;
-  } catch {
-    return null;
-  }
-}
-
-function sanitizePersistedUsers(users: AppState["users"] | undefined) {
-  if (!Array.isArray(users)) return undefined;
-
-  return users
-    .map((user) => {
-      const seed = seedUsers.find((item) => item.id === user.id);
-      return {
-        ...seed,
-        ...user,
-        email: seed?.email ?? user.email,
-        password: seed?.password ?? user.password,
-      } as User;
-    })
-    .filter((user) => Boolean(user.email)) as User[] | undefined;
-}
-
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const { user, isDemo, accessToken } = useAuth();
-  const isDemoUser = user ? demoUserIds.includes(user.id) : false;
-  const stored = isDemoUser ? readStoredState() : null;
-  const persistedUsers = sanitizePersistedUsers(stored?.users);
-  const [users, setUsers] = useState<User[]>(
-    isDemoUser ? (persistedUsers?.length ? persistedUsers : seedUsers) : [],
-  );
-  const [requests, setRequests] = useState<BloodRequest[]>(
-    isDemoUser ? (stored?.requests ?? seedRequests) : [],
-  );
-  const [institutions, setInstitutions] = useState<Institution[]>(
-    isDemoUser ? (stored?.institutions ?? seedInstitutions) : [],
-  );
-  const [safetyFlags, setSafetyFlags] = useState<SafetyFlag[]>(
-    isDemoUser ? (stored?.safetyFlags ?? seedSafetyFlags) : [],
-  );
-  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>(
-    isDemoUser ? (stored?.auditEvents ?? seedAuditEvents) : [],
-  );
-  const [fulfillments, setFulfillments] = useState<FulfillmentRecord[]>(
-    isDemoUser ? (stored?.fulfillments ?? seedFulfillments) : [],
-  );
-  const [inventory, setInventory] = useState<InventoryItem[]>(
-    isDemoUser ? (stored?.inventory ?? []) : [],
-  );
+  const { user, accessToken } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const [requests, setRequests] = useState<BloodRequest[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [safetyFlags, setSafetyFlags] = useState<SafetyFlag[]>([]);
+  const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
+  const [fulfillments, setFulfillments] = useState<FulfillmentRecord[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [hydrationLoading, setHydrationLoading] = useState(
-    !isDemoUser && Boolean(accessToken && ["Admin", "Hospital", "Partner"].includes(user?.role ?? "")),
+    Boolean(accessToken && ["Admin", "Hospital", "Partner"].includes(user?.role ?? "")),
   );
   const [hydrationError, setHydrationError] = useState("");
   const [hydrationAttempt, setHydrationAttempt] = useState(0);
   useEffect(() => {
-    if (isDemoUser || !accessToken || !["Admin", "Hospital", "Partner"].includes(user?.role ?? "")) {
+    if (!accessToken || !["Admin", "Hospital", "Partner"].includes(user?.role ?? "")) {
       return;
     }
     let active = true;
@@ -123,31 +69,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
     };
-  }, [isDemoUser, accessToken, user?.role, user?.id, user?.name, user?.phone, user?.createdAt, hydrationAttempt]);
-  useEffect(() => {
-    if (!isDemoUser) return;
-    window.localStorage.setItem(
-      storageKey,
-      JSON.stringify({
-        users,
-        requests,
-        institutions,
-        safetyFlags,
-        auditEvents,
-        fulfillments,
-        inventory,
-      }),
-    );
-  }, [
-    isDemoUser,
-    users,
-    requests,
-    institutions,
-    safetyFlags,
-    auditEvents,
-    fulfillments,
-    inventory,
-  ]);
+  }, [accessToken, user?.role, user?.id, user?.name, user?.phone, user?.createdAt, hydrationAttempt]);
+
   const addAudit = (
     action: string,
     targetType: AuditEvent["targetType"],
@@ -174,7 +97,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     reason?: string,
   ) => {
     const target = requests.find((request) => request.id === requestId);
-    if (!isDemoUser && accessToken) {
+    if (accessToken) {
       await verifyHospitalRequestApi(accessToken, requestId, isVerified);
       const liveRequests = await getHospitalPendingRequests(accessToken);
       setRequests(liveRequests);
@@ -217,7 +140,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     isApproved: boolean,
     note?: string,
   ) => {
-    if (!isDemo && accessToken) {
+    if (accessToken) {
       const institution = institutions.find((item) => item.id === institutionId);
       if (!institution) return;
       if (institution.type === "Hospital") {
@@ -257,7 +180,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     institutionId = "inst-alkhidmat",
     staffUserId = "usr-partner",
   ) => {
-    if (!isDemoUser && accessToken) {
+    if (accessToken) {
       await fulfillFromStockApi(accessToken, requestId, unitsClaimed);
       const [external, own, liveFulfillments] = await Promise.all([getPartnerExternalRequests(accessToken), getPartnerOwnRequests(accessToken), getPartnerFulfillments(accessToken)]);
       setRequests([...own, ...external.filter((externalRequest) => !own.some((ownRequest) => ownRequest.id === externalRequest.id))]);
@@ -313,7 +236,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     addAudit(`Claimed ${claim} units`, "Request", requestId);
   };
   const recordHandover = async (fulfillmentId: string) => {
-    if (!isDemoUser && accessToken) {
+    if (accessToken) {
       await updatePartnerFulfillment(accessToken, fulfillmentId, "handover");
       setFulfillments(await getPartnerFulfillments(accessToken));
       return;
@@ -327,7 +250,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
   const confirmFulfillment = async (fulfillmentId: string) => {
-    if (!isDemoUser && accessToken) {
+    if (accessToken) {
       await updatePartnerFulfillment(accessToken, fulfillmentId, "confirm");
       setFulfillments(await getPartnerFulfillments(accessToken));
       return;
@@ -355,7 +278,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       "id" | "createdAt" | "unitsFulfilled" | "unitsRemaining" | "status"
     >,
   ) => {
-    if (!isDemoUser && accessToken) {
+    if (accessToken) {
       await createPartnerRequest(accessToken, {
         blood_type_needed: requestData.bloodGroup,
         units_needed: requestData.unitsRequired,
@@ -445,7 +368,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const setUserActive = async (userId: string, isActive: boolean, note?: string) => {
     const target = users.find((item) => item.id === userId);
     if (!target) return;
-    if (!isDemoUser && accessToken) {
+    if (accessToken) {
       await updateAdminUserStatus(accessToken, target, isActive);
       const snapshot = await getAdminSnapshot(accessToken);
       setUsers(snapshot.users);

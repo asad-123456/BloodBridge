@@ -41,7 +41,7 @@ export function RegisteredUsers() {
       {actionError && <p role="alert" className="mb-5 rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{actionError}</p>}
       <div className="mb-5 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search size={17} className="absolute left-3 top-3 text-slate-400" />
+          <Search size={17} className="absolute left-3 top-3 text-slate-500" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -75,7 +75,7 @@ export function RegisteredUsers() {
               <div>
                 <p className="font-bold text-slate-900">{user.name}</p>
                 <p className="mt-1 text-sm text-slate-500">{user.email} · {user.phone}</p>
-                {institution && <p className="mt-1 text-xs text-slate-400">{institution.name}</p>}
+                {institution && <p className="mt-1 text-xs text-slate-500">{institution.name}</p>}
               </div>
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{category}</span>

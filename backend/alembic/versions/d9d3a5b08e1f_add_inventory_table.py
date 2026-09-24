@@ -36,7 +36,7 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_index(
-        "ix_blood_inventories_blood_group_component_type",
+        "ix_blood_inventories_blood_type_needed_component_type",
         "blood_inventories",
         ["organization_id", "blood_group", "component_type"],
         unique=False,
@@ -44,6 +44,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index("ix_blood_inventories_blood_group_component_type", table_name="blood_inventories")
+    op.drop_index("ix_blood_inventories_blood_type_needed_component_type", table_name="blood_inventories")
     op.drop_index("ix_blood_inventories_organization_id", table_name="blood_inventories")
     op.drop_table("blood_inventories")

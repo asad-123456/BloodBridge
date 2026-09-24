@@ -26,7 +26,7 @@ export function SafetyFlags() {
                     <p className="font-bold text-slate-900">{flag.category} report · {flag.id}</p>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-slate-600">{flag.excerpt}</p>
-                  <p className="mt-2 text-xs text-slate-400">Reported user: {reported?.name ?? flag.reportedUserId}</p>
+                  <p className="mt-2 text-xs text-slate-500">Reported user: {reported?.name ?? flag.reportedUserId}</p>
                 </div>
                 <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700">Open</span>
               </div>

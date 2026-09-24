@@ -14,7 +14,7 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: ChatWindowProps) {
-  const { accessToken, user, isDemo } = useAuth();
+  const { accessToken, user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -23,15 +23,6 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
   const endRef = useRef<HTMLDivElement>(null);
 
   const fetchMessages = async () => {
-    if (isDemo) {
-      setMessages([
-        { id: "1", sender_id: "other", content: "Hi, I am on my way to the hospital.", sent_at: new Date(Date.now() - 60000).toISOString() },
-        { id: "2", sender_id: user?.id, content: "Thank you so much! Ward 3.", sent_at: new Date().toISOString() }
-      ]);
-      setLoading(false);
-      return;
-    }
-
     try {
       const res = await fetch(`${apiBaseUrl}/chat/${matchId}/messages`, {
         headers: { Authorization: `Bearer ${accessToken}` }
@@ -49,11 +40,9 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
 
   useEffect(() => {
     fetchMessages();
-    if (!isDemo) {
-      const interval = setInterval(fetchMessages, 3000); // HTTP Polling every 3s
-      return () => clearInterval(interval);
-    }
-  }, [matchId, accessToken, isDemo, user?.id]);
+    const interval = setInterval(fetchMessages, 3000); // HTTP Polling every 3s
+    return () => clearInterval(interval);
+  }, [matchId, accessToken, user?.id]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -63,13 +52,6 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
   const handleReport = async () => {
     if (!reportReason.trim()) return;
     
-    if (isDemo) {
-      toast.success("Demo: Chat reported successfully");
-      setIsReporting(false);
-      setReportReason("");
-      return;
-    }
-
     try {
       const res = await fetch(`${apiBaseUrl}/chat/${matchId}/report`, {
         method: "POST",
@@ -86,7 +68,7 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
       } else {
         toast.error("Failed to report chat");
       }
-    } catch (err) {
+    } catch {
       toast.error("Network error");
     }
   };
@@ -94,12 +76,6 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
-
-    if (isDemo) {
-      setMessages([...messages, { id: Date.now().toString(), sender_id: user?.id, content: inputText, sent_at: new Date().toISOString() }]);
-      setInputText("");
-      return;
-    }
 
     try {
       const res = await fetch(`${apiBaseUrl}/chat/${matchId}/messages`, {
@@ -116,7 +92,7 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
       } else {
         toast.error("Failed to send message");
       }
-    } catch (err) {
+    } catch {
       toast.error("Network error");
     }
   };
@@ -126,14 +102,14 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
       {/* Contextual Header */}
       <div className="bg-slate-900 p-4 text-white flex justify-between items-start">
         <div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{contextSubtitle}</p>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">{contextSubtitle}</p>
           <h3 className="font-bold text-sm leading-snug">{contextTitle}</h3>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setIsReporting(true)} className="text-slate-400 hover:text-red-400 transition-colors p-1" title="Report Chat">
+          <button onClick={() => setIsReporting(true)} className="text-slate-500 hover:text-red-400 transition-colors p-1" title="Report Chat">
             <Flag size={16} />
           </button>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors p-1">
+          <button onClick={onClose} aria-label="Close chat" className="text-slate-500 hover:text-white transition-colors p-1">
             <X size={18} />
           </button>
         </div>
@@ -193,7 +169,7 @@ export function ChatWindow({ matchId, contextTitle, contextSubtitle, onClose }: 
           placeholder="Type a message..."
           className="flex-1 bg-slate-100 border-transparent focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl px-4 py-2 outline-none text-sm transition-all"
         />
-        <button type="submit" disabled={!inputText.trim()} className="p-2 bg-primary text-white rounded-xl hover:bg-primary-hover disabled:opacity-50 disabled:hover:bg-primary transition-colors">
+        <button type="submit" aria-label="Send message" disabled={!inputText.trim()} className="p-2 bg-primary text-white rounded-xl hover:bg-primary-hover disabled:opacity-50 disabled:hover:bg-primary transition-colors">
           <Send size={18} />
         </button>
       </form>

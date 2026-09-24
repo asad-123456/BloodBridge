@@ -100,7 +100,7 @@ def complete_match(match_id: str, db: Session, identity: Identity) -> RequestMat
             identity.entity.eligible_after = datetime.now(timezone.utc) + timedelta(days=90)
         db.flush()
         # Once no commitment is outstanding and the target is met, the request
-        # is genuinely FULFILLED rather than merely FULLY_MATCHED.
+        # is genuinely FULFILLED rather than merely PARTIALLY_MATCHED.
         blood_requests_controller.mark_fulfilled_if_complete(blood_request, db)
         db.commit()
     except Exception:

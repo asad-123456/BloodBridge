@@ -15,7 +15,7 @@ Traditional blood donation networks often suffer from fragmented communication, 
 1. **A Request is Made:** A patient's family requests blood via the mobile app, or a hospital initiates a request directly.
 2. **Hospital Verification:** The receiving hospital verifies the request in the web portal to prevent spam and ensure medical necessity.
 3. **Geospatial Matching:** The BloodBridge algorithm instantly scans the region using **PostGIS**, finding eligible donors within a strict radius who have not donated in the last 90 days.
-4. **Push Notifications:** Matched donors receive an instant push alert on their phone, allowing them to accept the request and head to the hospital.
+4. **Live BloodFeed:** Matched donors check their live BloodFeed, which surfaces requests within their geospatial radius, allowing them to commit and head to the hospital.
 5. **Institutional Backup:** If no donors are available, partnered blood banks (like regional Red Crescent centers) are notified and can fulfill the request directly from their cold-storage inventory.
 
 ## Core Features & Medical Guardrails

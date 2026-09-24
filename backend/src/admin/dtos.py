@@ -68,7 +68,7 @@ class AuditEventOut(BaseModel):
 class MetricsOut(BaseModel):
     total_requests: int
     fulfilled_requests: int
-    units_required: int
-    units_fulfilled: int
+    units_needed: int
+    units_secured: int
     open_safety_flags: int
     partner_claims: int

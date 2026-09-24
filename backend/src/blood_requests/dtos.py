@@ -88,4 +88,4 @@ class WidenRadiusRequest(BaseModel):
 
 class FulfillRequestDTO(BaseModel):
     units_to_fulfill: int = Field(gt=0)
-    component_type: str = "Whole Blood"
+    component_type: str = "Whole Blood"  # TODO: enum

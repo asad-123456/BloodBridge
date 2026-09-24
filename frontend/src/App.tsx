@@ -49,7 +49,7 @@ function PortalSelection() {
           >
             <img
               src="/bloodbridge-icon.png"
-              alt=""
+              alt="BloodBridge Logo"
               className="size-12 rounded-xl object-contain"
             />
           </Link>
@@ -86,7 +86,7 @@ function PortalSelection() {
                   >
                     <Icon size={23} />
                   </span>
-                  <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                  <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
                     {label}
                   </p>
                   <h2 className="mt-2 text-xl font-extrabold text-slate-950">
@@ -156,7 +156,7 @@ function PartnerSelection() {
           >
             <img
               src="/bloodbridge-icon.png"
-              alt=""
+              alt="BloodBridge Logo"
               className="size-12 rounded-xl object-contain"
             />
           </Link>
@@ -192,7 +192,7 @@ function PartnerSelection() {
                   >
                     <Icon size={23} />
                   </span>
-                  <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                  <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
                     {label}
                   </p>
                   <h2 className="mt-2 text-xl font-extrabold text-slate-950">

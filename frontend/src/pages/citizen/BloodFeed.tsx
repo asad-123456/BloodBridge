@@ -1,8 +1,13 @@
-import type { BloodRequestOut } from "../../types";
+import toast from 'react-hot-toast';
+import type { BloodRequestOut, UrgencyLevel } from "../../types";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/useAuth";
 import { apiBaseUrl, acceptRequestMatch } from "../../api/client";
 import { ShareMenu } from "../../components/common/ShareMenu";
+import { EmptyState } from "../../components/common/EmptyState";
+import { UrgencyBadge } from "../../components/common/UrgencyBadge";
+// from "../../components/common/EmptyState";
+import { SearchX } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { setupLeafletIcons } from "../../utils/leafletIcons";
@@ -10,7 +15,7 @@ import { setupLeafletIcons } from "../../utils/leafletIcons";
 setupLeafletIcons();
 
 export function BloodFeed() {
-  const { accessToken, isDemo } = useAuth();
+  const { accessToken } = useAuth();
   const [requests, setRequests] = useState<BloodRequestOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
@@ -26,7 +31,7 @@ export function BloodFeed() {
         const { latitude, longitude } = position.coords;
         setUserPos([latitude, longitude]);
                 // Fetch stats for cooldown
-        if (!isDemo && accessToken) {
+        if (accessToken) {
           fetch(`${apiBaseUrl}/donors/me/stats`, {
             headers: { Authorization: `Bearer ${accessToken}` }
           })
@@ -39,16 +44,6 @@ export function BloodFeed() {
             })
             .catch(console.error);
         }
-        
-        // --- DEMO MOCK LOGIC (EASILY DELETABLE) ---
-        if (isDemo) {
-          setRequests([
-            { id: "demo-1", required_by: "Demo Patient", blood_type_needed: "O+", urgency_level: "critical", distance_km: 2.4, latitude: latitude + 0.01, longitude: longitude + 0.01, patient_name: "Demo Patient", area_label: "City Hospital", contact_phone: "+92 300 0000000" }
-          ] as BloodRequestOut[]);
-          setLoading(false);
-          return;
-        }
-        // ------------------------------------------
         try {
           const res = await fetch(`${apiBaseUrl}/blood-requests/nearby/for-me?latitude=${latitude}&longitude=${longitude}&radius_km=50`, {
             headers: { Authorization: `Bearer ${accessToken}` },
@@ -67,16 +62,16 @@ export function BloodFeed() {
       },
       () => setLoading(false)
     );
-  }, [accessToken, isDemo]);
+  }, [accessToken]);
 
-  if (loading) return <div className="p-8">Locating nearby requests...</div>;
+  if (loading) return <div className="flex h-[50vh] items-center justify-center p-8"><div className="flex flex-col items-center gap-3"><div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary border-r-primary"></div><p className="text-sm font-semibold text-slate-500">Locating nearby requests...</p></div></div>;
 
   return (
     <div className="p-8 flex flex-col h-full">
       <h1 className="text-2xl font-bold mb-6">Nearby Blood Requests</h1>
       
       {requests.length === 0 ? (
-        <p className="text-slate-500">No requests nearby that match your blood type.</p>
+        <EmptyState icon={SearchX} title="No nearby requests" description="There are no active blood requests in your area that match your blood type right now." actionText="Refresh Feed" onAction={() => window.location.reload()} />
       ) : (
         <div className="flex flex-col lg:flex-row gap-8 flex-1">
           <div className="w-full lg:w-1/2 flex flex-col gap-4 overflow-y-auto max-h-[70vh] pr-2">
@@ -88,7 +83,7 @@ export function BloodFeed() {
                     <p className="text-sm font-semibold text-slate-800 mt-1">{req.patient_name} &bull; {req.area_label}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="bg-red-50 text-red-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">{req.urgency_level}</span>
+                    <UrgencyBadge level={req.urgency_level as UrgencyLevel} />
                     <ShareMenu request={req} />
                   </div>
                 </div>
@@ -99,19 +94,19 @@ export function BloodFeed() {
                   </button>
                 ) : (
                   <button onClick={() => { 
-                    if (isDemo) { alert("Demo Mode: Committed!"); return; }
+                    
                     const unitsStr = window.prompt("How many units can you donate?", "1");
                     if (!unitsStr) return;
                     const units = parseInt(unitsStr, 10);
-                    if (isNaN(units) || units < 1) { alert("Invalid units"); return; }
+                    if (isNaN(units) || units < 1) { toast.error("Invalid units"); return; }
                     
                     const etaStr = window.prompt("ETA in hours?", "2");
                     if (!etaStr) return;
                     const etaHours = parseFloat(etaStr);
-                    if (isNaN(etaHours) || etaHours <= 0) { alert("Invalid ETA"); return; }
+                    if (isNaN(etaHours) || etaHours <= 0) { toast.error("Invalid ETA"); return; }
                     
                     const eta = new Date(Date.now() + etaHours * 60 * 60 * 1000).toISOString();
-                    acceptRequestMatch(req.id, units, eta, accessToken || "").then(() => alert("Committed!")).catch(e => alert(e.message)) }} className="w-full bg-primary text-white py-2 rounded-lg text-sm font-semibold hover:bg-primary-hover transition">
+                    acceptRequestMatch(req.id, units, eta, accessToken || "").then(() => toast.success("Committed!")).catch(e => toast.error(e.message)) }} className="w-full bg-primary text-white py-2 rounded-lg text-sm font-semibold hover:bg-primary-hover transition">
                     Commit to Donate
                   </button>
                 )}

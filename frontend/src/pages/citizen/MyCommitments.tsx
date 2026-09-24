@@ -5,21 +5,12 @@ import { getMyCommitments } from "../../api/client";
 
 import { ChatWindow } from "../../components/chat/ChatWindow";
 export function MyCommitments() {
-  const { accessToken, isDemo } = useAuth();
+  const { accessToken } = useAuth();
   const [commitments, setCommitments] = useState<RequestMatchOut[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeChat, setActiveChat] = useState<{matchId: string, title: string, subtitle: string} | null>(null);
 
   useEffect(() => {
-        // --- DEMO MOCK LOGIC (EASILY DELETABLE) ---
-    if (isDemo) {
-      setCommitments([
-        { id: "demo-com-1", blood_request_id: "demo-req", status: "Active", blood_request: { blood_type_needed: "O+", urgency_level: "urgent", patient_name: "John Doe", area_label: "City Hospital", units_needed: 1 } }
-      ] as RequestMatchOut[]);
-      setLoading(false);
-      return;
-    }
-    // ------------------------------------------
     if (accessToken) {
       getMyCommitments(accessToken)
         .then((data) => setCommitments(data as RequestMatchOut[]))

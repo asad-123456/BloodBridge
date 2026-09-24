@@ -59,8 +59,6 @@ class Settings(BaseSettings):
     # rather than accepting a blank email/password pair.
     ADMIN_EMAIL: str = ""
     ADMIN_PASSWORD: str = ""
-    DEMO_ADMIN_EMAIL: str = ""
-    DEMO_ADMIN_PASSWORD: str = ""
 
     # --- Background sweeps ---------------------------------------------------
     # The expiry / auto-widen sweeps run on a timer inside the API process (see
@@ -89,7 +87,6 @@ class Settings(BaseSettings):
     def admin_configured(self) -> bool:
         return bool(
             (self.ADMIN_EMAIL and self.ADMIN_PASSWORD)
-            or (self.DEMO_ADMIN_EMAIL and self.DEMO_ADMIN_PASSWORD)
         )
 
 

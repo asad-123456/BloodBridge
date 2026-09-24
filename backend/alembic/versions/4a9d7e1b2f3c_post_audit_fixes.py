@@ -1,4 +1,4 @@
-﻿"""post_audit_fixes
+"""post_audit_fixes
 
 Revision ID: 4a9d7e1b2f3c
 Revises: ff01a1b2c3d4
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '4a9d7e1b2f3c'
-down_revision: Union[str, None] = 'ff01a1b2c3d4'
+down_revision: Union[str, None] = '3f3f2c0e836f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

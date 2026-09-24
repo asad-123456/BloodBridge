@@ -1,3 +1,4 @@
+from sqlalchemy.orm import selectinload
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -204,7 +205,8 @@ def hospital_decide(request_id: str, approve: bool, hospital: Hospital, db: Sess
     if blood_request.status != RequestStatus.PENDING_VERIFICATION:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Request is not pending verification")
 
-    blood_request.status = RequestStatus.ACTIVE if approve else RequestStatus.REJECTED
+    blood_request.status = RequestStatus.ACTIVE
+    blood_request.cancellation_reason = None if approve else RequestStatus.REJECTED
     db.commit()
     db.refresh(blood_request)
 
@@ -222,12 +224,10 @@ def list_pending_for_hospital(hospital: Hospital, db: Session) -> list[BloodRequ
     )
 
 
-def list_nearby_for_donor(donor: Donor, db: Session) -> list[dtos.NearbyBloodRequestOut]:
-    if donor.location is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Set your availability location before browsing nearby requests",
-        )
+def list_nearby_for_donor(donor: Donor, latitude: float, longitude: float, radius_km: float, db: Session) -> list[dtos.NearbyBloodRequestOut]:
+    # Use dynamic location from browser
+    search_location = make_point(latitude, longitude)
+
 
     if donor.eligible_after and donor.eligible_after > datetime.now(timezone.utc):
         return []
@@ -246,12 +246,12 @@ def list_nearby_for_donor(donor: Donor, db: Session) -> list[dtos.NearbyBloodReq
         .where(RequestMatch.status == MatchStatus.ACCEPTED)
     )
 
-    distance_expr = (ST_Distance(BloodRequest.location, donor.location) / 1000.0).label("distance_km")
+    distance_expr = (ST_Distance(BloodRequest.location, search_location) / 1000.0).label("distance_km")
     rows = (
         db.query(BloodRequest, distance_expr)
         .filter(BloodRequest.status.in_(OPEN_STATUSES))
         .filter(BloodRequest.blood_type_needed.in_(compatible_recipients))
-        .filter(ST_DWithin(BloodRequest.location, donor.location, BloodRequest.current_radius_km * 1000))
+        .filter(ST_DWithin(BloodRequest.location, search_location, func.least(radius_km, BloodRequest.current_radius_km) * 1000))
         .filter(BloodRequest.id.notin_(already_committed))
         .order_by(distance_expr.asc())
         .all()
@@ -412,6 +412,7 @@ def auto_widen_stale_requests(db: Session) -> int:
     candidates = (
         db.query(BloodRequest)
         .filter(BloodRequest.status.in_(OPEN_STATUSES))
+        .filter(BloodRequest.required_by > now)
         .filter(BloodRequest.current_radius_km < MAX_RADIUS_KM)
         .all()
     )
@@ -515,7 +516,7 @@ def cancel_open_matches(blood_request: BloodRequest, reason: str, db: Session) -
 
 def mark_fulfilled_if_complete(blood_request: BloodRequest, db: Session) -> None:
     """FULFILLED means every commitment was actually honoured — distinct from
-    FULLY_MATCHED, which only means enough donors said yes."""
+    PARTIALLY_MATCHED, which only means enough donors said yes."""
     if _open_match_count(blood_request, db):
         return
     if blood_request.units_secured >= blood_request.units_needed:
@@ -553,7 +554,7 @@ def _assert_is_poster(blood_request: BloodRequest, identity: Identity) -> None:
 get_current_poster = require_roles("donor", "organization")
 
 def list_my_requests(poster: Identity, db: Session) -> list[BloodRequest]:
-    query = db.query(BloodRequest)
+    query = db.query(BloodRequest).options(selectinload(BloodRequest.matches))
     if poster.role == 'donor':
         query = query.filter(BloodRequest.donor_id == poster.entity.id)
     else:

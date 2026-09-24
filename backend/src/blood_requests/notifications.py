@@ -105,6 +105,6 @@ def notify_donors_for_request(
         blood_request.current_radius_km,
         trigger,
     )
-    # — send to [donor.device_token for donor in donors], and drop any token the
-    # provider reports as unregistered.
+    # Note: Push notifications are explicitly disabled for this web-app deployment.
+    # Users rely on the live BloodFeed.
     return donors

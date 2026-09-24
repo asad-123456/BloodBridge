@@ -5,22 +5,11 @@ import { apiBaseUrl } from "../../api/client";
 import { Award, Droplet, Heart, Clock, ShieldCheck, Activity } from "lucide-react";
 
 export function Profile() {
-  const { user, accessToken, isDemo } = useAuth();
+  const { user, accessToken } = useAuth();
   const [stats, setStats] = useState<DonorStatsOut | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isDemo) {
-      setStats({
-        units_donated: 12,
-        lives_impacted: 36,
-        donations_count: 5,
-        badges: ["First Drop", "Bronze Hero", "Silver Lifesaver"],
-        eligible_after: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString() // 15 days from now
-      });
-      setLoading(false);
-      return;
-    }
 
     if (accessToken) {
       fetch(`${apiBaseUrl}/donors/me/stats`, {
@@ -31,7 +20,7 @@ export function Profile() {
         .catch(console.error)
         .finally(() => setLoading(false));
     }
-  }, [accessToken, isDemo]);
+  }, [accessToken]);
 
   if (loading) return <div className="p-8">Loading profile...</div>;
 
@@ -51,8 +40,8 @@ export function Profile() {
         
         <div className="flex justify-between items-start relative z-10">
           <div>
-            <p className="text-slate-400 font-bold tracking-widest text-sm uppercase mb-1">BloodBridge Donor</p>
-            <h1 className="text-3xl font-black">{user?.name || "Demo Citizen"}</h1>
+            <p className="text-slate-500 font-bold tracking-widest text-sm uppercase mb-1">BloodBridge Donor</p>
+            <h1 className="text-3xl font-black">{user?.name || "Citizen"}</h1>
             <p className="text-slate-300 mt-2 flex items-center gap-2">
               <ShieldCheck size={16} className="text-green-400" />
               Verified Account

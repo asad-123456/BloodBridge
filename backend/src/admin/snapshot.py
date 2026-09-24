@@ -65,7 +65,7 @@ def load_snapshot(db: Session) -> dict:
             "status": {
                 "pending_verification": "Pending hospital verification",
                 "partially_matched": "Matched / In progress",
-                "fully_matched": "Matched / In progress",
+                "partially_matched": "Matched / In progress",
                 "rejected": "Cancelled",
                 "cancelled": "Cancelled",
                 "expired": "Expired",

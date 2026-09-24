@@ -34,11 +34,8 @@ def login(data: dtos.AdminLogin) -> str:
     # would reveal whether the address was the right one.
     actual_email_ok = constant_time_equals(data.email, settings.ADMIN_EMAIL)
     actual_password_ok = constant_time_equals(data.password, settings.ADMIN_PASSWORD)
-    demo_email_ok = constant_time_equals(data.email, settings.DEMO_ADMIN_EMAIL)
-    demo_password_ok = constant_time_equals(data.password, settings.DEMO_ADMIN_PASSWORD)
     if not (
         (actual_email_ok and actual_password_ok)
-        or (demo_email_ok and demo_password_ok)
     ):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
@@ -149,8 +146,8 @@ def metrics(db: Session) -> dtos.MetricsOut:
     return dtos.MetricsOut(
         total_requests=len(requests),
         fulfilled_requests=sum(item.status.value == "fulfilled" for item in requests),
-        units_required=sum(item.units_needed for item in requests),
-        units_fulfilled=sum(item.units_secured for item in requests),
+        units_needed=sum(item.units_needed for item in requests),
+        units_secured=sum(item.units_secured for item in requests),
         open_safety_flags=db.query(SafetyFlag).filter(SafetyFlag.status == "open").count(),
         partner_claims=db.query(RequestMatch).count(),
     )

@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlalchemy.orm import Session
 
@@ -60,10 +61,10 @@ def fulfillments(org: Organization = Depends(get_current_organization), db: Sess
 
 
 @router.patch("/fulfillments/{match_id}/handover", response_model=dtos.PartnerFulfillmentOut)
-def handover(match_id: str, org: Organization = Depends(get_current_organization), db: Session = Depends(get_db)):
+def handover(match_id: uuid.UUID, org: Organization = Depends(get_current_organization), db: Session = Depends(get_db)):
     return controller.update_fulfillment(match_id, org, "handover", db)
 
 
 @router.patch("/fulfillments/{match_id}/confirm", response_model=dtos.PartnerFulfillmentOut)
-def confirm(match_id: str, org: Organization = Depends(get_current_organization), db: Session = Depends(get_db)):
+def confirm(match_id: uuid.UUID, org: Organization = Depends(get_current_organization), db: Session = Depends(get_db)):
     return controller.update_fulfillment(match_id, org, "confirm", db)

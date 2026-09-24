@@ -8,11 +8,11 @@ import { Profile } from "./Profile";
 export function CitizenRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<BloodFeed />} />
-      <Route path="/new-request" element={<CreateRequest />} />
-      <Route path="/my-requests" element={<MyRequests />} />
-      <Route path="/commitments" element={<MyCommitments />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route index element={<BloodFeed />} />
+      <Route path="new-request" element={<CreateRequest />} />
+      <Route path="my-requests" element={<MyRequests />} />
+      <Route path="commitments" element={<MyCommitments />} />
+      <Route path="profile" element={<Profile />} />
     </Routes>
   );
 }

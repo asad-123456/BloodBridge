@@ -2,7 +2,6 @@ import { useState, type FormEvent } from "react";
 import { ArrowRight, Droplet, LockKeyhole } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
-import { demoUserIds, seedUsers } from "../../utils/mockData";
 import type { PortalRole } from "../../context/authContextValue";
 
 const config: Record<
@@ -41,51 +40,27 @@ const config: Record<
   
 };
 
-const demoCredentials: Record<
-  PortalRole,
-  { email: string; password: string }
-> = {
-  Admin: { email: "demo_admin@hemalink.com", password: "DemoAdmin@123" },
-  Hospital: {
-    email: "demo_hospital@hemalink.com",
-    password: "DemoHospital@123",
-  },
-  Partner: {
-    email: "demo_partner@hemalink.com",
-    password: "DemoPartner@123",
-  },
-  Citizen: { email: "demo_citizen@bloodbridge.com", password: "DemoCitizen@123" },
-  
-};
 
 export function PortalLogin({ role }: { role: PortalRole }) {
   const navigate = useNavigate();
-  const { login, loginWithBackend } = useAuth();
+  const { loginWithBackend } = useAuth();
   const settings = config[role];
-  const demoAccount = demoCredentials[role];
-  const [email, setEmail] = useState(demoAccount.email);
-  const [password, setPassword] = useState(demoAccount.password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    setIsSubmitting(true);
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const demoUser = seedUsers.find(
-        (candidate) =>
-          demoUserIds.includes(candidate.id) &&
-          candidate.role === settings.type &&
-          candidate.email.toLowerCase() === normalizedEmail &&
-          candidate.password === password,
-      );
-      if (demoUser) {
-        login(role, demoUser);
-      } else {
-        await loginWithBackend(role, normalizedEmail, password);
-      }
+      await loginWithBackend(role, normalizedEmail, password);
       setError("");
       navigate(settings.destination);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "The email or password is not valid.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
   return (
@@ -118,17 +93,7 @@ export function PortalLogin({ role }: { role: PortalRole }) {
             .
           </p>
         )}
-        <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber-700">
-            Demo mode
-          </p>
-          <p className="mt-2 text-xs text-slate-700">
-            Email: <span className="font-bold">{demoAccount.email}</span>
-          </p>
-          <p className="text-xs text-slate-700">
-            Password: <span className="font-bold">{demoAccount.password}</span>
-          </p>
-        </div>
+
         <form onSubmit={submit} className="mt-7 space-y-4">
           <label className="block text-sm font-bold text-slate-700">
             Registered email
@@ -164,7 +129,7 @@ export function PortalLogin({ role }: { role: PortalRole }) {
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-primary-hover"
           >
             <LockKeyhole size={17} />
-            Sign in
+            {isSubmitting ? "Signing in..." : "Sign in"}
             <ArrowRight size={16} />
           </button>
         </form>

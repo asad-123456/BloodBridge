@@ -4,5 +4,7 @@ __pycache__
 *.pyc
 .env
 .pytest_cache
-alembic.ini
 
+
+.env.*
+.git

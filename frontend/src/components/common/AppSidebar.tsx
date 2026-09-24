@@ -7,13 +7,11 @@ import {
   LayoutDashboard,
   ListChecks,
   PlusCircle,
-  RotateCcw,
   Settings,
   Users,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../../context/useAuth";
-import { demoUserIds } from "../../utils/mockData";
+
 const navigation = {
   admin: [
     { label: "Overview", path: "/admin", icon: LayoutDashboard },
@@ -57,18 +55,10 @@ const navigation = {
   ]
 };
 export function AppSidebar({ role }: { role: "admin" | "hospital" | "partner" | "citizen" }) {
-  const { user } = useAuth();
-  const isDemoUser = user ? demoUserIds.includes(user.id) : false;
-  const resetDemo = () => {
-    window.localStorage.removeItem("bloodbridge-mock-state");
-    window.sessionStorage.removeItem("bloodbridge-auth-session");
-    window.location.reload();
-  };
-
   return (
     <aside className="w-64 shrink-0 hidden md:block border-r border-slate-200 bg-white p-4 lg:block">
       <div className="mb-7 px-3">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
           Workspace
         </p>
         <p className="mt-1 font-bold capitalize text-slate-900">
@@ -90,19 +80,6 @@ export function AppSidebar({ role }: { role: "admin" | "hospital" | "partner" | 
           </NavLink>
         ))}
       </nav>
-      {isDemoUser && <div className="mt-10 rounded-xl bg-slate-50 p-4">
-        <p className="text-xs font-bold text-slate-700">Frontend demo mode</p>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          Changes are stored in this browser until the demo is reset.
-        </p>
-        <button
-          type="button"
-          onClick={resetDemo}
-          className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-primary hover:text-primary-hover"
-        >
-          <RotateCcw size={14} /> Reset demo data
-        </button>
-      </div>}
     </aside>
   );
 }

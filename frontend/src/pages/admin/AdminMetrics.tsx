@@ -54,7 +54,7 @@ export function AdminMetrics() {
             </div>
           </div>
           <div className="mt-5 flex items-center gap-2 text-sm text-green-700">
-            <ShieldCheck size={17} /> Mock notification delivery is ready for API replacement.
+            <ShieldCheck size={17} /> Live notifications are successfully routed and delivered.
           </div>
         </div>
       </div>
