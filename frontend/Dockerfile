@@ -6,7 +6,9 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-# We build the frontend; optionally pass environment variables here if needed
+# Allow injecting API URL at build time for production deployments
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
 # --- Stage 2: Serve the application via Nginx ---

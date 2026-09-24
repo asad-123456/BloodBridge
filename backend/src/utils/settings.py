@@ -13,25 +13,25 @@ class Settings(BaseSettings):
 
     # Connection pool. The defaults are deliberately larger than SQLAlchemy's
     # (5 + 10) because chat holds connections for short bursts under load.
-    DB_POOL_SIZE: int
-    DB_MAX_OVERFLOW: int
-    DB_ECHO: bool
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+    DB_ECHO: bool = False
 
     # JWT — only the secret is mandatory; the rest have sane defaults so a
     # fresh checkout starts with a minimal .env.
     JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    EMAIL_TOKEN_EXPIRE_MINUTES: int
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    EMAIL_TOKEN_EXPIRE_MINUTES: int = 60
 
 
     # --- Web -----------------------------------------------------------------
     FRONTEND_URL: str
 
-    # When true (the default), donors and requestors must click the emailed
+    # When true (the default), donors and citizens must click the emailed
     # verification link before they can log in. Set false for local work with
     # no SMTP server configured, otherwise nobody can ever verify.
-    REQUIRE_EMAIL_VERIFICATION: bool
+    REQUIRE_EMAIL_VERIFICATION: bool = True
 
     # Comma-separated list of allowed browser origins. Falls back to
     # FRONTEND_URL. Never "*" — the app authenticates with bearer tokens and
@@ -40,35 +40,35 @@ class Settings(BaseSettings):
 
     # Set true only when running behind a proxy/load balancer you control,
     # so the rate limiter keys on X-Forwarded-For instead of the proxy IP.
-    TRUST_PROXY: bool
+    TRUST_PROXY: bool = False
 
     # Mail (optional — signup still works, verification mail is just skipped)
-    MAIL_USERNAME: str
-    MAIL_PASSWORD: str
-    MAIL_FROM: str
-    MAIL_PORT: int
-    MAIL_SERVER: str
-    MAIL_FROM_NAME: str
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = ""
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = ""
+    MAIL_FROM_NAME: str = "BloodBridge"
 
     # Cloudinary (optional — uploads return 503 until configured)
-    CLOUDINARY_CLOUD_NAME: str
-    CLOUDINARY_API_KEY: str
-    CLOUDINARY_API_SECRET: str
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
 
     # Hardcoded admin (no admin DB table). Login is disabled while unset,
     # rather than accepting a blank email/password pair.
-    ADMIN_EMAIL: str
-    ADMIN_PASSWORD: str
-    DEMO_ADMIN_EMAIL: str
-    DEMO_ADMIN_PASSWORD: str
+    ADMIN_EMAIL: str = ""
+    ADMIN_PASSWORD: str = ""
+    DEMO_ADMIN_EMAIL: str = ""
+    DEMO_ADMIN_PASSWORD: str = ""
 
     # --- Background sweeps ---------------------------------------------------
     # The expiry / auto-widen sweeps run on a timer inside the API process (see
     # src/utils/scheduler.py). Set false for tests, one-off scripts, or when a
     # single worker should own the timer while the others only serve requests.
     # Defaulted rather than required, so an existing .env keeps working.
-    ENABLE_SCHEDULER: bool
-    SWEEP_INTERVAL_MINUTES: int
+    ENABLE_SCHEDULER: bool = True
+    SWEEP_INTERVAL_MINUTES: int = 5
 
     @property
     def cors_origin_list(self) -> list[str]:
@@ -94,3 +94,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

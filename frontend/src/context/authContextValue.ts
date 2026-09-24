@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import type { User } from "../types";
 
-export type PortalRole = "Admin" | "Hospital" | "Partner";
+export type PortalRole = "Admin" | "Hospital" | "Partner" | "Citizen";
 export interface AuthState {
   user: User | null;
   isDemo: boolean;
@@ -11,3 +11,4 @@ export interface AuthState {
   logout: () => void;
 }
 export const AuthContext = createContext<AuthState | undefined>(undefined);
+

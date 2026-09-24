@@ -28,7 +28,7 @@ class BloodRequest(Base):
 
     # Exactly one of these is set — whoever posted the request. Enforced by
     # ck_blood_requests_one_poster below, not just by convention.
-    requestor_id = Column(UUID(as_uuid=True), ForeignKey("requestors.id"), nullable=True)
+    donor_id = Column(UUID(as_uuid=True), ForeignKey("donors.id"), nullable=True)
     organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
 
     patient_name = Column(String, nullable=False)
@@ -40,7 +40,7 @@ class BloodRequest(Base):
     required_by = Column(DateTime(timezone=True), nullable=False)
 
     # Hospital-backed tracking: hospital_name_text is always what the
-    # requestor typed; hospital_id is only set if that name matched a
+    # donor typed; hospital_id is only set if that name matched a
     # registered, on-platform hospital.
     hospital_name_text = Column(String, nullable=True)
     hospital_id = Column(UUID(as_uuid=True), ForeignKey("hospitals.id"), nullable=True)
@@ -58,10 +58,10 @@ class BloodRequest(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    requestor = relationship("Requestor", back_populates="blood_requests")
     organization = relationship("Organization", back_populates="blood_requests")
     hospital = relationship("Hospital", back_populates="requests_backed")
     matches = relationship("RequestMatch", back_populates="blood_request", cascade="all, delete-orphan")
+    donor = relationship("Donor", back_populates="blood_requests")
 
     __table_args__ = (
         CheckConstraint("units_needed > 0", name="ck_blood_requests_units_needed_positive"),
@@ -71,17 +71,20 @@ class BloodRequest(Base):
         ),
         CheckConstraint("current_radius_km > 0", name="ck_blood_requests_radius_positive"),
         CheckConstraint(
-            "(requestor_id IS NOT NULL AND organization_id IS NULL)"
-            " OR (requestor_id IS NULL AND organization_id IS NOT NULL)",
+            "(donor_id IS NOT NULL AND organization_id IS NULL)"
+            " OR (donor_id IS NULL AND organization_id IS NOT NULL)",
             name="ck_blood_requests_one_poster",
         ),
         # Postgres does not index foreign keys automatically, and the nearby
         # feed filters on status + blood type before the spatial predicate.
         Index("ix_blood_requests_status", "status"),
         Index("ix_blood_requests_blood_type_needed", "blood_type_needed"),
-        Index("ix_blood_requests_requestor_id", "requestor_id"),
+        Index("ix_blood_requests_donor_id", "donor_id"),
         Index("ix_blood_requests_organization_id", "organization_id"),
         Index("ix_blood_requests_hospital_id", "hospital_id"),
         # The expiry sweep scans required_by against now().
         Index("ix_blood_requests_required_by", "required_by"),
     )
+
+
+

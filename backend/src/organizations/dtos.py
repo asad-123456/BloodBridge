@@ -16,6 +16,13 @@ class OrganizationSignup(BaseModel):
     latitude: Latitude
     longitude: Longitude
 
+    # Verification Fields
+    license_number: str
+    facility_type: str
+    contact_person_name: str
+    contact_person_designation: str
+    website_url: str | None = None
+
 
 class OrganizationLogin(BaseModel):
     email: EmailStr
@@ -31,6 +38,13 @@ class OrganizationOut(BaseModel):
     phone: str
     address: str
     logo_url: str | None
+    
+    license_number: str | None
+    facility_type: str | None
+    contact_person_name: str | None
+    contact_person_designation: str | None
+    website_url: str | None
+
     approval_status: ApprovalStatus
     is_email_verified: bool
     created_at: datetime
@@ -53,7 +67,7 @@ class PartnerRequestCreate(BaseModel):
 class PartnerRequestOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
-    requestor_id: uuid.UUID | None
+    donor_id: uuid.UUID | None
     organization_id: uuid.UUID | None
     blood_type_needed: BloodType
     units_needed: int

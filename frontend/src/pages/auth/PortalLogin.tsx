@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Droplet, LockKeyhole } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { demoUserIds, seedUsers } from "../../utils/mockData";
 import type { PortalRole } from "../../context/authContextValue";
@@ -11,7 +11,7 @@ const config: Record<
     title: string;
     subtitle: string;
     destination: string;
-    type: "Admin" | "Hospital" | "Partner";
+    type: PortalRole;
   }
 > = {
   Admin: {
@@ -32,6 +32,13 @@ const config: Record<
     destination: "/partner",
     type: "Partner",
   },
+  Citizen: {
+    title: "Citizen Portal",
+    subtitle: "Sign in to broadcast emergencies or donate blood.",
+    destination: "/citizen",
+    type: "Citizen",
+  },
+  
 };
 
 const demoCredentials: Record<
@@ -47,6 +54,8 @@ const demoCredentials: Record<
     email: "demo_partner@hemalink.com",
     password: "DemoPartner@123",
   },
+  Citizen: { email: "demo_citizen@bloodbridge.com", password: "DemoCitizen@123" },
+  
 };
 
 export function PortalLogin({ role }: { role: PortalRole }) {
@@ -98,14 +107,14 @@ export function PortalLogin({ role }: { role: PortalRole }) {
           {settings.subtitle}
         </p>
         {role !== "Admin" && (
-          <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
-            Need to register an account? Contact a BloodBridge admin at{" "}
-            <a
-              href="mailto:admin@hemalink.com"
+          <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm leading-5 text-slate-600">
+            Need to register your institution?{" "}
+            <Link
+              to={`/${role.toLowerCase()}/signup`}
               className="font-bold text-primary hover:underline"
             >
-              admin@hemalink.com
-            </a>
+              Apply here
+            </Link>
             .
           </p>
         )}
@@ -169,3 +178,6 @@ export function PortalLogin({ role }: { role: PortalRole }) {
     </div>
   );
 }
+
+
+

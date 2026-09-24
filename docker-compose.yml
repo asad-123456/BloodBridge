@@ -43,6 +43,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        # Pass the backend's exposed URL to the frontend build process
+        - VITE_API_BASE_URL=http://localhost:8000
     container_name: bloodbridge-frontend
     restart: always
     ports:

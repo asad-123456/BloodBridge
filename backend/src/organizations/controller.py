@@ -3,15 +3,15 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
+from src.blood_requests.models import BloodRequest
 from src.organizations import dtos
 from src.organizations.models import Organization
-from src.blood_requests.models import BloodRequest
 from src.request_matches.models import RequestMatch
-from src.utils.constants import DEFAULT_RADIUS_KM
-from src.utils.enums import MatchStatus, RequestStatus
 from src.utils import accounts
 from src.utils.auth import get_current_entity
 from src.utils.cloudinary_utils import upload_image
+from src.utils.constants import DEFAULT_RADIUS_KM
+from src.utils.enums import MatchStatus, RequestStatus
 from src.utils.geo import make_point
 from src.utils.helpers import create_access_token, hash_password, verify_password
 
@@ -35,6 +35,11 @@ def signup(data: dtos.OrganizationSignup, db: Session) -> Organization:
         password_hash=hash_password(data.password),
         address=data.address,
         location=make_point(data.latitude, data.longitude),
+        license_number=data.license_number,
+        facility_type=data.facility_type,
+        contact_person_name=data.contact_person_name,
+        contact_person_designation=data.contact_person_designation,
+        website_url=data.website_url,
     )
     db.add(org)
     db.commit()
@@ -61,7 +66,7 @@ def upload_logo(org: Organization, file: UploadFile, db: Session) -> Organizatio
 def list_external_requests(org: Organization, db: Session) -> list[BloodRequest]:
     return (
         db.query(BloodRequest)
-        .filter(BloodRequest.organization_id != org.id)
+        .filter(BloodRequest.organization_id.is_distinct_from(org.id))
         .filter(BloodRequest.status.in_((RequestStatus.ACTIVE, RequestStatus.PARTIALLY_MATCHED)))
         .filter(BloodRequest.units_secured < BloodRequest.units_needed)
         .order_by(BloodRequest.required_by.asc())

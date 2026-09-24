@@ -35,6 +35,8 @@ class MatchStatus(str, enum.Enum):
     ACCEPTED = "accepted"
     CANCELLED = "cancelled"
     COMPLETED = "completed"
+    HANDOVER = "handover"
+    CONFIRMED = "confirmed"
 
 
 class ApprovalStatus(str, enum.Enum):
@@ -45,5 +47,5 @@ class ApprovalStatus(str, enum.Enum):
 
 class SenderType(str, enum.Enum):
     DONOR = "donor"
-    REQUESTOR = "requestor"
     ORGANIZATION = "organization"
+

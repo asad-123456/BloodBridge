@@ -2,12 +2,11 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from src.admin import dtos
-from src.hospitals.models import Hospital
-from src.organizations.models import Organization
-from src.donors.models import Donor
-from src.requestors.models import Requestor
 from src.admin.activity_models import AuditEvent, SafetyFlag
 from src.blood_requests.models import BloodRequest
+from src.donors.models import Donor
+from src.hospitals.models import Hospital
+from src.organizations.models import Organization
 from src.request_matches.models import RequestMatch
 from src.utils.auth import require_roles
 from src.utils.enums import ApprovalStatus
@@ -18,7 +17,6 @@ get_current_admin = require_roles("admin")
 
 USER_MODELS = {
     "donor": (Donor, "full_name", None),
-    "requestor": (Requestor, "full_name", None),
     "hospital": (Hospital, "name", "hospital"),
     "organization": (Organization, "name", "organization"),
 }

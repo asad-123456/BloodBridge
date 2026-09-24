@@ -1,4 +1,3 @@
-from typing import List
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -12,7 +11,7 @@ from src.utils.database import get_db
 router = APIRouter(prefix="/inventory", tags=["Partner Inventory"])
 
 
-@router.get("", response_model=List[InventoryResponseDTO])
+@router.get("", response_model=list[InventoryResponseDTO])
 def get_inventory(
     db: Session = Depends(get_db),
     current_org: Organization = Depends(get_current_organization),

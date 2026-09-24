@@ -1,12 +1,14 @@
 import type { BloodRequest, InventoryItem, UrgencyLevel, User } from "../types";
 import type { PortalRole } from "../context/authContextValue";
 
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8001").replace(/\/$/, "");
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000").replace(/\/$/, "");
 
 const roleConfig: Record<PortalRole, { loginPath: string; mePath?: string; backendRole: User["role"] }> = {
   Admin: { loginPath: "/admin/login", backendRole: "Admin" },
   Hospital: { loginPath: "/hospitals/login", mePath: "/hospitals/me", backendRole: "Hospital" },
   Partner: { loginPath: "/organizations/login", mePath: "/organizations/me", backendRole: "Partner" },
+  Citizen: { loginPath: "/donors/login", mePath: "/donors/me", backendRole: "Citizen" },
+  
 };
 
 type LoginResponse = { access_token: string };
@@ -82,7 +84,7 @@ export function getAdminSnapshot(token: string) {
 
 type BackendBloodRequest = {
   id: string;
-  requestor_id: string | null;
+  donor_id: string | null;
   organization_id: string | null;
   blood_type_needed: import("../types").BloodGroup;
   units_needed: number;
@@ -101,7 +103,7 @@ export async function getHospitalPendingRequests(token: string): Promise<BloodRe
   const requests = await request<BackendBloodRequest[]>("/blood-requests/hospital/pending", {}, token);
   return requests.map((item) => ({
     id: item.id,
-    requesterId: item.requestor_id ?? item.organization_id ?? "",
+    requesterId: item.donor_id ?? item.organization_id ?? "",
     hospitalId: item.hospital_id ?? undefined,
     hospitalName: item.hospital_name_text ?? "Unspecified facility",
     isHospitalRegistered: item.is_hospital_backed,
@@ -139,7 +141,7 @@ function mapPartnerRequest(item: PartnerRequestResponse): BloodRequest {
   const statuses: Record<string, BloodRequest["status"]> = { active: "Active", partially_matched: "Matched / In progress", fully_matched: "Matched / In progress", fulfilled: "Fulfilled", pending_verification: "Pending hospital verification" };
   return {
     id: item.id,
-    requesterId: item.organization_id ?? item.requestor_id ?? "",
+    requesterId: item.organization_id ?? item.donor_id ?? "",
     hospitalId: item.hospital_id ?? undefined,
     hospitalName: item.hospital_name_text ?? "Unspecified facility",
     isHospitalRegistered: item.is_hospital_backed,
@@ -210,8 +212,7 @@ type AdminUserResponse = {
 };
 
 const adminRolePaths: Record<Exclude<User["role"], "Admin">, string> = {
-  Donor: "donor",
-  Requestor: "requestor",
+  Citizen: "donor",
   Hospital: "hospital",
   Partner: "organization",
 };
@@ -255,3 +256,65 @@ export function decideOrganization(token: string, id: string, approve: boolean):
 }
 
 export { apiBaseUrl };
+
+export async function signupHospital(payload: Record<string, string | number | undefined>) {
+  return request('/hospitals/signup', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function signupOrganization(payload: Record<string, string | number | undefined>) {
+  return request('/organizations/signup', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+
+export async function signupDonor(payload: Record<string, string | number | undefined>) {
+  return request('/donors/signup', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+
+
+
+export async function createBloodRequest(payload: any, token?: string) {
+  return request('/blood-requests', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }, token);
+}
+
+export async function getNearbyRequests(lat: number, lng: number, radius_km: number, token?: string) {
+  return request('/blood-requests/nearby?latitude=' + lat + '&longitude=' + lng + '&radius_km=' + radius_km, {
+    method: 'GET',
+  }, token);
+}
+
+export async function acceptRequestMatch(requestId: string, units_committed: number, eta: string, token?: string) {
+  return request(`/request-matches/${requestId}/accept`, {
+    method: 'POST',
+    body: JSON.stringify({ units_committed, eta }),
+  }, token);
+}
+
+
+export async function getMyRequests(token?: string) {
+  return request('/blood-requests/mine/all', {
+    method: 'GET',
+  }, token);
+}
+
+export async function getMyCommitments(token?: string) {
+  return request('/request-matches/mine', {
+    method: 'GET',
+  }, token);
+}
+
+
+
+

@@ -25,7 +25,7 @@ import { decideHospital, decideOrganization } from "../api/client";
 
 import { AppStateContext, type AppState } from "./appStateContextValue";
 const now = () => new Date().toISOString();
-const storageKey = "hemalink-mock-state";
+const storageKey = "bloodbridge-mock-state";
 
 function readStoredState() {
   try {

@@ -16,7 +16,6 @@ from sqlalchemy.orm import Session
 from src.donors.models import Donor
 from src.hospitals.models import Hospital
 from src.organizations.models import Organization
-from src.requestors.models import Requestor
 from src.utils.database import get_db
 from src.utils.enums import ApprovalStatus
 from src.utils.helpers import decode_access_token
@@ -30,7 +29,6 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 ROLE_MODELS: dict[str, Any] = {
     "donor": Donor,
-    "requestor": Requestor,
     "hospital": Hospital,
     "organization": Organization,
 }
@@ -162,3 +160,5 @@ def get_current_entity(role: str):
         return load_entity(role, payload.get("id"), db, payload)
 
     return dependency
+
+

@@ -14,16 +14,17 @@ NULL` only alongside blood type and the GiST spatial predicate, both of which
 are already indexed and far more selective.
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "b91c47e5f3a2"
-down_revision: Union[str, Sequence[str], None] = "a7f3c9d21b84"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "a7f3c9d21b84"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

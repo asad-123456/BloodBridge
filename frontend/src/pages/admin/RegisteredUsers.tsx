@@ -21,7 +21,7 @@ export function RegisteredUsers() {
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const visible = users.filter((user) => {
     const institution = institutions.find((item) => item.id === user.institutionId);
-    const category = user.role === "Donor" || !institution
+    const category = user.role === "Citizen" || !institution
       ? "Individuals"
       : institution.type === "Partner" ? "Partners" : "Hospitals";
     return (
@@ -67,7 +67,7 @@ export function RegisteredUsers() {
         {hydrationLoading && <p className="px-5 py-10 text-center text-sm text-slate-500">Loading live registered users...</p>}
         {!hydrationLoading && visible.map((user) => {
           const institution = institutions.find((item) => item.id === user.institutionId);
-          const category = user.role === "Donor" || !institution
+          const category = user.role === "Citizen" || !institution
             ? "Individual"
             : institution.type === "Partner" ? "Partner institution" : "Hospital";
           return (

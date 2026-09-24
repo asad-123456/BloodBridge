@@ -25,6 +25,7 @@ class BloodRequestCreate(BaseModel):
     blood_type_needed: BloodType
     units_needed: Units
     urgency_level: UrgencyLevel
+    matches: list[MatchSummary] = []
     required_by: FutureDatetime
     hospital_name: Name | None = None  # free text; matched against registered hospitals server-side
     contact_phone: Phone
@@ -32,6 +33,13 @@ class BloodRequestCreate(BaseModel):
     longitude: Longitude
     area_label: Label
 
+
+class MatchSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    donor_id: uuid.UUID | None = None
+    units_committed: int
+    status: str
 
 class BloodRequestOut(BaseModel):
     """Full detail, including patient name and contact number. Only returned
@@ -42,13 +50,14 @@ class BloodRequestOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    requestor_id: uuid.UUID | None
+    donor_id: uuid.UUID | None
     organization_id: uuid.UUID | None
     patient_name: str
     blood_type_needed: BloodType
     units_needed: int
     units_secured: int
     urgency_level: UrgencyLevel
+    matches: list[MatchSummary] = []
     required_by: datetime
     hospital_name_text: str | None
     hospital_id: uuid.UUID | None

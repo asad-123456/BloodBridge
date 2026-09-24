@@ -12,12 +12,15 @@ ENABLE_SCHEDULER=false to keep it off even when the app really does run.
 """
 
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
-from src.blood_requests.controller import auto_widen_stale_requests, expire_overdue_requests
+from src.blood_requests.controller import (
+    auto_widen_stale_requests,
+    expire_overdue_requests,
+)
 from src.utils.database import session_scope
 from src.utils.settings import settings
 

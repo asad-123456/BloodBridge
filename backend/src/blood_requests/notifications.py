@@ -14,13 +14,13 @@ import logging
 from geoalchemy2.functions import ST_DWithin
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
 from src.blood_requests.models import BloodRequest
 from src.donors.models import Donor
 from src.request_matches.models import RequestMatch
 from src.utils.constants import COMPATIBLE_DONORS_FOR_RECIPIENT, OPEN_STATUSES
 from src.utils.enums import MatchStatus, UrgencyLevel
-from sqlalchemy.sql import func
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def find_donors_to_notify(blood_request: BloodRequest, db: Session) -> list[Dono
 
     Plus the two conditions the donor-facing feed got for free from being
     authenticated: the account is active, and it has a location to match on.
-    Donors without a device_token are skipped — there is nowhere to send to.
+    All active donors with a location are eligible for notification.
     """
     if blood_request.status not in OPEN_STATUSES:
         return []
@@ -60,7 +60,6 @@ def find_donors_to_notify(blood_request: BloodRequest, db: Session) -> list[Dono
 
     return (
         db.query(Donor)
-        .filter(Donor.device_token.isnot(None))
         .filter(Donor.is_active.is_(True))
         .filter(Donor.eligible_after.is_(None) | (Donor.eligible_after <= func.now()))
         .filter(Donor.location.isnot(None))
@@ -106,7 +105,6 @@ def notify_donors_for_request(
         blood_request.current_radius_km,
         trigger,
     )
-    # TODO: integrate FCM here once device tokens are collected from the frontend
     # — send to [donor.device_token for donor in donors], and drop any token the
     # provider reports as unregistered.
     return donors

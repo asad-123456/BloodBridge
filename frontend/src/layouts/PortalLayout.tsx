@@ -5,7 +5,7 @@ export function PortalLayout({
   role,
   children,
 }: {
-  role: "admin" | "hospital" | "partner";
+  role: "admin" | "hospital" | "partner" | "citizen";
   children: ReactNode;
 }) {
   return (
@@ -18,3 +18,4 @@ export function PortalLayout({
     </div>
   );
 }
+

@@ -7,7 +7,7 @@ import type {
   User,
 } from "../types";
 
-export const demoUserIds = ["usr-admin", "usr-hospital", "usr-partner"];
+export const demoUserIds = ["usr-admin", "usr-hospital", "usr-partner", "usr-citizen"];
 
 export const seedUsers: User[] = [
   {
@@ -43,15 +43,16 @@ export const seedUsers: User[] = [
     createdAt: "2026-08-05",
   },
   {
-    id: "usr-requester",
+    id: "usr-citizen",
     name: "Mariam Raza",
-    role: "Donor",
+    role: "Citizen",
     phone: "+92 312 555 0219",
-    email: "mariam@example.org",
-    password: "Donor@123",
+    email: "demo_citizen@bloodbridge.com",
+    password: "DemoCitizen@123",
     isActive: true,
     createdAt: "2026-08-10",
   },
+  
 ];
 export const seedInstitutions: Institution[] = [
   {
@@ -73,6 +74,11 @@ export const seedInstitutions: Institution[] = [
     contactName: "Dr. Nadia Ahmed",
     registrationStatus: "Pending",
     createdAt: "2026-08-18",
+    licenseNumber: "SMC-KHI-45902",
+    facilityType: "Tertiary Care Hospital",
+    contactPersonName: "Dr. Nadia Ahmed",
+    contactPersonDesignation: "Chief Medical Officer",
+    websiteUrl: "https://www.jinnahmedicalcentre-khi.org.pk",
   },
   {
     id: "inst-alkhidmat",
@@ -243,3 +249,5 @@ export const seedAuditEvents: AuditEvent[] = [
     timestamp: "2026-08-25T15:20:00Z",
   },
 ];
+
+

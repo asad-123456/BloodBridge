@@ -1,14 +1,11 @@
 from sqlalchemy.orm import Session
 
+from src.admin.activity_models import AuditEvent, SafetyFlag
+from src.blood_requests.models import BloodRequest
 from src.donors.models import Donor
 from src.hospitals.models import Hospital
 from src.organizations.models import Organization
-from src.requestors.models import Requestor
-from src.blood_requests.models import BloodRequest
-from src.admin.activity_models import AuditEvent, SafetyFlag
 from src.request_matches.models import RequestMatch
-
-
 def _user(entity, role: str, name: str, institution_id=None) -> dict:
     return {
         "id": str(entity.id),
@@ -43,10 +40,6 @@ def load_snapshot(db: Session) -> dict:
         for item in db.query(Donor).order_by(Donor.created_at.desc()).all()
     ]
     users.extend(
-        _user(item, "Requestor", item.full_name)
-        for item in db.query(Requestor).order_by(Requestor.created_at.desc()).all()
-    )
-    users.extend(
         _user(item, "Hospital", item.name, item.id)
         for item in hospitals
     )
@@ -59,7 +52,7 @@ def load_snapshot(db: Session) -> dict:
     for item in db.query(BloodRequest).order_by(BloodRequest.created_at.desc()).all():
         requests.append({
             "id": str(item.id),
-            "requesterId": str(item.requestor_id or item.organization_id),
+            "requesterId": str(item.donor_id or item.organization_id),
             "hospitalId": str(item.hospital_id) if item.hospital_id else None,
             "hospitalName": item.hospital_name_text or "Unspecified facility",
             "isHospitalRegistered": item.is_hospital_backed,

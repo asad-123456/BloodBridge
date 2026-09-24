@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from src.admin import controller, dtos
-from src.admin.snapshot import load_snapshot
 from src.admin.controller import get_current_admin
+from src.admin.snapshot import load_snapshot
 from src.hospitals.dtos import HospitalOut
 from src.organizations.dtos import OrganizationOut
 from src.utils.auth import Identity

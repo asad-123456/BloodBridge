@@ -16,7 +16,7 @@ MIN_RADIUS_KM = 1
 MAX_RADIUS_KM = 100
 
 # How long (minutes) a request can sit with no accepted match before
-# the radius auto-widens and the requestor is nudged. Consumed by
+# the radius auto-widens and the citizen is nudged. Consumed by
 # blood_requests.controller.auto_widen_stale_requests().
 WIDEN_AFTER_MINUTES = {
     UrgencyLevel.CRITICAL: 15,

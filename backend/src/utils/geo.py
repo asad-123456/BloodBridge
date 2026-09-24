@@ -1,5 +1,5 @@
 from geoalchemy2 import Geography
-from geoalchemy2.functions import ST_DWithin, ST_Distance, ST_MakePoint, ST_SetSRID
+from geoalchemy2.functions import ST_Distance, ST_DWithin, ST_MakePoint, ST_SetSRID
 from sqlalchemy import Column
 
 

@@ -6,6 +6,7 @@ import {
   HeartPulse,
   LayoutDashboard,
   ListChecks,
+  PlusCircle,
   RotateCcw,
   Settings,
   Users,
@@ -47,18 +48,25 @@ const navigation = {
     { label: "History", path: "/partner/history", icon: FileClock },
     { label: "Profile", path: "/partner/profile", icon: Settings },
   ],
+  citizen: [
+    { label: "Live Feed", path: "/citizen", icon: Activity },
+    { label: "My Commitments", path: "/citizen/commitments", icon: HeartPulse },
+    { label: "New Request", path: "/citizen/new-request", icon: PlusCircle },
+    { label: "My Requests", path: "/citizen/my-requests", icon: ListChecks },
+    { label: "Profile", path: "/citizen/profile", icon: Settings },
+  ]
 };
-export function AppSidebar({ role }: { role: keyof typeof navigation }) {
+export function AppSidebar({ role }: { role: "admin" | "hospital" | "partner" | "citizen" }) {
   const { user } = useAuth();
   const isDemoUser = user ? demoUserIds.includes(user.id) : false;
   const resetDemo = () => {
-    window.localStorage.removeItem("hemalink-mock-state");
-    window.sessionStorage.removeItem("hemalink-auth-session");
+    window.localStorage.removeItem("bloodbridge-mock-state");
+    window.sessionStorage.removeItem("bloodbridge-auth-session");
     window.location.reload();
   };
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white p-4 lg:block">
+    <aside className="w-64 shrink-0 hidden md:block border-r border-slate-200 bg-white p-4 lg:block">
       <div className="mb-7 px-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
           Workspace
@@ -98,3 +106,6 @@ export function AppSidebar({ role }: { role: keyof typeof navigation }) {
     </aside>
   );
 }
+
+
+

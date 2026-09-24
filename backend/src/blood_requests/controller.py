@@ -45,11 +45,11 @@ def _find_registered_hospital(hospital_name: str | None, db: Session) -> Hospita
 def create_request(data: dtos.BloodRequestCreate, db: Session, identity: Identity) -> BloodRequest:
     hospital = _find_registered_hospital(data.hospital_name, db)
     is_hospital_backed = hospital is not None
-    requestor_id = identity.entity.id if identity.role == "requestor" else None
+    donor_id = identity.entity.id if identity.role == "donor" else None
     organization_id = identity.entity.id if identity.role == "organization" else None
 
     blood_request = BloodRequest(
-        requestor_id=requestor_id,
+        donor_id=donor_id,
         organization_id=organization_id,
         patient_name=data.patient_name,
         blood_type_needed=data.blood_type_needed,
@@ -121,7 +121,7 @@ def assert_can_view_request(blood_request: BloodRequest, identity: Identity, db:
     """Patient name and contact number are only for people with a reason to
     see them:
 
-    * the poster (requestor or organization) and an admin;
+    * the poster (donor or organization) and an admin;
     * the hospital named on the request, which has to verify it;
     * a donor the request is actively reaching out to — blood-type compatible
       and inside the current radius while the request is open;
@@ -136,7 +136,7 @@ def assert_can_view_request(blood_request: BloodRequest, identity: Identity, db:
 
     if identity.is_admin:
         return
-    if identity.role == "requestor" and blood_request.requestor_id == entity.id:
+    if identity.role == "donor" and blood_request.donor_id == entity.id:
         return
     if identity.role == "organization" and blood_request.organization_id == entity.id:
         return
@@ -541,7 +541,7 @@ def _status_for_secured_units(blood_request: BloodRequest) -> RequestStatus:
 
 def _assert_is_poster(blood_request: BloodRequest, identity: Identity) -> None:
     entity = identity.entity
-    if identity.role == "requestor" and blood_request.requestor_id == entity.id:
+    if identity.role == "donor" and blood_request.donor_id == entity.id:
         return
     if identity.role == "organization" and blood_request.organization_id == entity.id:
         return
@@ -550,4 +550,15 @@ def _assert_is_poster(blood_request: BloodRequest, identity: Identity) -> None:
 
 # --- "poster" identity: either a Requestor or an Organization can post a
 # request, so this endpoint accepts both roles rather than forcing two flows.
-get_current_poster = require_roles("requestor", "organization")
+get_current_poster = require_roles("donor", "organization")
+
+def list_my_requests(poster: Identity, db: Session) -> list[BloodRequest]:
+    query = db.query(BloodRequest)
+    if poster.role == 'donor':
+        query = query.filter(BloodRequest.donor_id == poster.entity.id)
+    else:
+        query = query.filter(BloodRequest.organization_id == poster.entity.id)
+    return query.order_by(BloodRequest.created_at.desc()).all()
+
+
+

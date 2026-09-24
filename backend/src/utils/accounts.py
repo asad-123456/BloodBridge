@@ -1,4 +1,4 @@
-"""Account plumbing shared by donors, requestors, hospitals and organizations.
+"""Account plumbing shared by donors, citizens, hospitals and organizations.
 
 These four modules each had their own copy of the signup/verify/login/reset
 logic, which is how the missing email-verification check on login ended up in

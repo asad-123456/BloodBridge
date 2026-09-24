@@ -33,3 +33,7 @@ class ChatMessageOut(BaseModel):
 
 class ChatMessageIn(BaseModel):
     content: MessageBody
+
+class ChatReportIn(BaseModel):
+    category: str = Field(..., max_length=30)
+    excerpt: str = Field(..., max_length=500)

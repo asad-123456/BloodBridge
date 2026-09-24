@@ -23,6 +23,14 @@ class MatchCancel(BaseModel):
     reason: Reason | None = None
 
 
+class MatchRequestSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    blood_type_needed: str
+    urgency_level: str
+    patient_name: str
+    area_label: str
+    units_needed: int
+
 class RequestMatchOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,3 +46,4 @@ class RequestMatchOut(BaseModel):
     completed_at: datetime | None
     handover_at: datetime | None
     confirmed_at: datetime | None
+    blood_request: MatchRequestSummary | None = None

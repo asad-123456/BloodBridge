@@ -27,6 +27,11 @@ def signup(data: dtos.HospitalSignup, db: Session) -> Hospital:
         password_hash=hash_password(data.password),
         address=data.address,
         location=make_point(data.latitude, data.longitude),
+        license_number=data.license_number,
+        facility_type=data.facility_type,
+        contact_person_name=data.contact_person_name,
+        contact_person_designation=data.contact_person_designation,
+        website_url=data.website_url,
     )
     db.add(hospital)
     db.commit()

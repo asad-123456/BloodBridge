@@ -9,6 +9,7 @@ from src.donors.models import Donor
 from src.hospitals.controller import get_current_hospital
 from src.hospitals.models import Hospital
 from src.inventory.models import BloodInventory
+from src.request_matches.models import RequestMatch
 from src.organizations.controller import get_current_organization
 from src.organizations.models import Organization
 from src.utils.auth import Identity, get_current_identity
@@ -87,15 +88,7 @@ def fulfill_request_by_partner(
         status=MatchStatus.ACCEPTED,
     )
     db.add(match)
-    blood_request.units_secured = min(
-        blood_request.units_secured + payload.units_to_fulfill,
-        blood_request.units_needed,
-    )
-    blood_request.status = (
-        RequestStatus.FULFILLED
-        if blood_request.units_secured >= blood_request.units_needed
-        else RequestStatus.PARTIALLY_MATCHED
-    )
+    controller.atomic_reserve_units(blood_request, payload.units_to_fulfill, db)
 
     db.commit()
     db.refresh(blood_request)
@@ -188,3 +181,11 @@ def expire_overdue(db: Session = Depends(get_db), _admin: Identity = Depends(get
 @router.post("/admin/auto-widen")
 def auto_widen(db: Session = Depends(get_db), _admin: Identity = Depends(get_current_admin)):
     return {"widened_count": controller.auto_widen_stale_requests(db)}
+
+@router.get('/mine/all', response_model=list[dtos.BloodRequestOut])
+def list_my_requests(
+    poster: Identity = Depends(get_current_poster),
+    db: Session = Depends(get_db),
+):
+    return controller.list_my_requests(poster, db)
+

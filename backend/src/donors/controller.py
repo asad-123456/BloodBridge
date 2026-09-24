@@ -1,6 +1,8 @@
 from fastapi import BackgroundTasks, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
+from src.request_matches.models import RequestMatch
+from src.utils.enums import MatchStatus
 from src.donors import dtos
 from src.donors.models import Donor
 from src.utils import accounts
@@ -78,19 +80,6 @@ def update_profile(donor: Donor, data: dtos.DonorUpdateProfile, db: Session) -> 
     return donor
 
 
-def update_device_token(donor: Donor, data: dtos.DonorUpdateDeviceToken, db: Session) -> Donor:
-    """Register (or, with an explicit null, unregister) this donor's push token.
-
-    Unlike update_profile() a None is honoured rather than skipped: the column
-    is nullable, and clearing it is how the app says "stop notifying this
-    device" on logout.
-    """
-    donor.device_token = data.device_token
-    db.commit()
-    db.refresh(donor)
-    return donor
-
-
 def upload_profile_pic(donor: Donor, file: UploadFile, db: Session) -> Donor:
     donor.profile_pic_url = upload_image(file, folder="bloodbridge/donors")
     db.commit()
@@ -111,3 +100,31 @@ def reset_password(data: dtos.ResetPasswordRequest, db: Session) -> None:
     if not donor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Donor not found")
     accounts.apply_password_reset(donor, data.new_password, payload, db)
+
+def get_donor_stats(donor: Donor, db: Session) -> dtos.DonorStatsOut:
+    matches = db.query(RequestMatch).filter(
+        RequestMatch.donor_id == donor.id,
+        RequestMatch.status.in_([MatchStatus.COMPLETED, MatchStatus.CONFIRMED, MatchStatus.HANDOVER])
+    ).all()
+    
+    units = sum(m.units_committed for m in matches)
+    count = len(matches)
+    
+    badges = []
+    if count >= 1:
+        badges.append("First Drop")
+    if units >= 5:
+        badges.append("Bronze Hero")
+    if units >= 10:
+        badges.append("Silver Lifesaver")
+    if units >= 25:
+        badges.append("Gold Champion")
+    
+    return dtos.DonorStatsOut(
+        units_donated=units,
+        lives_impacted=units * 3,
+        donations_count=count,
+        badges=badges,
+        eligible_after=donor.eligible_after,
+        blood_type=donor.blood_type
+    )

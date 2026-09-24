@@ -24,6 +24,13 @@ class Hospital(Base):
     location = Column(GeographyPoint(nullable=False), nullable=False)
     logo_url = Column(String, nullable=True)
 
+    # Verification Fields
+    license_number = Column(String, nullable=True)
+    facility_type = Column(String, nullable=True)
+    contact_person_name = Column(String, nullable=True)
+    contact_person_designation = Column(String, nullable=True)
+    website_url = Column(String, nullable=True)
+
     approval_status = Column(
         Enum(ApprovalStatus, name="approval_status"), default=ApprovalStatus.PENDING, nullable=False
     )

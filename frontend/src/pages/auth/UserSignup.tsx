@@ -1,0 +1,188 @@
+import { useState, type FormEvent } from "react";
+import { ArrowRight, CheckCircle2, Droplet, UserPlus } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { signupDonor } from "../../api/client";
+
+export function UserSignup() {
+  const settings = { title: "Citizen Registration", subtitle: "Sign up to broadcast emergencies and donate blood." };
+  const navigate = useNavigate();
+
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form State
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bloodType, setBloodType] = useState("O+");
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      await signupDonor({
+        full_name: fullName,
+        email: email.trim(),
+        phone,
+        password,
+        blood_type: bloodType,
+      });
+
+      setIsSuccess(true);
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "An error occurred during registration. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSuccess) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-slate-50 p-5">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm">
+          <div className="mx-auto grid size-16 place-items-center rounded-full bg-green-50 text-green-600">
+            <CheckCircle2 size={32} />
+          </div>
+          <h2 className="mt-5 text-2xl font-extrabold text-slate-900">
+            Registration Complete
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Welcome to the BloodBridge network.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            You can now log in to access your portal.
+          </p>
+          <button
+            onClick={() => navigate(`/citizen/login`)}
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-primary-hover"
+          >
+            Go to login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid min-h-screen place-items-center bg-slate-50 p-5 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+        <div className="mb-8 flex items-center gap-2">
+          <span className="grid size-10 place-items-center rounded-xl bg-primary text-white">
+            <Droplet size={21} fill="currentColor" />
+          </span>
+          <span className="text-xl font-extrabold tracking-tight text-slate-950">
+            Blood<span className="text-primary">Bridge</span>
+          </span>
+        </div>
+        <p className="mb-2 text-sm font-bold text-primary">Registration</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
+          {settings.title}
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          {settings.subtitle}
+        </p>
+
+        <form onSubmit={submit} className="mt-8 space-y-4">
+          <label className="block text-sm font-bold text-slate-700">
+            Full Name
+            <input
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-normal outline-none focus:border-primary"
+            />
+          </label>
+
+          <label className="block text-sm font-bold text-slate-700">
+            Phone Number
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+              placeholder="+92 300 1234567"
+              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-normal outline-none focus:border-primary"
+            />
+          </label>
+
+          <label className="block text-sm font-bold text-slate-700">
+            Blood Type
+            <select
+              value={bloodType}
+              onChange={(e) => setBloodType(e.target.value)}
+              required
+              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 font-normal outline-none focus:border-primary"
+            >
+              {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bt) => (
+                <option key={bt} value={bt}>
+                  {bt}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="my-4 h-px bg-slate-100" />
+
+          <label className="block text-sm font-bold text-slate-700">
+            Email Address
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              required
+              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-normal outline-none focus:border-primary"
+            />
+          </label>
+          <label className="block text-sm font-bold text-slate-700">
+            Password
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              required
+              minLength={8}
+              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-normal outline-none focus:border-primary"
+            />
+          </label>
+
+          {error && (
+            <p
+              role="alert"
+              className="mt-2 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700"
+            >
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-50"
+          >
+            <UserPlus size={17} />
+            Complete Registration
+            <ArrowRight size={16} />
+          </button>
+        </form>
+
+        <p className="mt-5 text-center text-sm font-semibold text-slate-500">
+          Already have an account?{" "}
+          <Link
+            to={`/citizen/login`}
+            className="text-primary hover:underline"
+          >
+            Sign in
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+

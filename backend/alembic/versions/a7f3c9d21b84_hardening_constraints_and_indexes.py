@@ -20,16 +20,17 @@ with pre-existing data, clean up any row that has both (or neither) of
 requestor_id/organization_id before running this.
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
+
 from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "a7f3c9d21b84"
-down_revision: Union[str, Sequence[str], None] = "22db9659d0b8"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "22db9659d0b8"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 ACCOUNT_TABLES = ("donors", "requestors", "hospitals", "organizations")
 

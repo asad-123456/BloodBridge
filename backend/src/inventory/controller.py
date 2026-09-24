@@ -1,4 +1,3 @@
-from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -7,7 +6,7 @@ from src.inventory.models import BloodInventory
 from src.organizations.models import Organization
 
 
-def get_inventory(db: Session, current_org: Organization) -> List[BloodInventory]:
+def get_inventory(db: Session, current_org: Organization) -> list[BloodInventory]:
     return (
         db.query(BloodInventory)
         .filter(BloodInventory.organization_id == current_org.id)

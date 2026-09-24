@@ -4,13 +4,14 @@ Revision ID: c2f4a8b9d1e0
 Revises: f4e8c1a2b7d9
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "c2f4a8b9d1e0"
-down_revision: Union[str, Sequence[str], None] = "f4e8c1a2b7d9"
+down_revision: str | Sequence[str] | None = "f4e8c1a2b7d9"
 branch_labels = None
 depends_on = None
 

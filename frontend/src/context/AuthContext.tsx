@@ -3,8 +3,8 @@ import type { User } from "../types";
 import { AuthContext, type PortalRole } from "./authContextValue";
 import { loginWithApi } from "../api/client";
 import { demoUserIds } from "../utils/mockData";
-const authKey = "hemalink-auth-session";
-const tokenKey = "hemalink-access-token";
+const authKey = "bloodbridge-auth-session";
+const tokenKey = "bloodbridge-access-token";
 
 function readStoredSession(): User | null {
   try {

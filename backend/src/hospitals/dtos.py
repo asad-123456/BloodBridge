@@ -15,6 +15,13 @@ class HospitalSignup(BaseModel):
     address: Address
     latitude: Latitude
     longitude: Longitude
+    
+    # Verification Fields
+    license_number: str
+    facility_type: str
+    contact_person_name: str
+    contact_person_designation: str
+    website_url: str | None = None
 
 
 class HospitalLogin(BaseModel):
@@ -31,6 +38,13 @@ class HospitalOut(BaseModel):
     phone: str
     address: str
     logo_url: str | None
+    
+    license_number: str | None
+    facility_type: str | None
+    contact_person_name: str | None
+    contact_person_designation: str | None
+    website_url: str | None
+    
     approval_status: ApprovalStatus
     is_email_verified: bool
     created_at: datetime
