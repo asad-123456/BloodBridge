@@ -14,6 +14,7 @@ from src.utils.cloudinary_utils import upload_image
 from src.utils.constants import DEFAULT_RADIUS_KM
 from src.utils.enums import MatchStatus, RequestStatus
 from src.utils.geo import make_point
+from src.utils.settings import settings
 from src.utils.helpers import create_access_token, hash_password, verify_password
 
 ROLE = "organization"
@@ -22,6 +23,8 @@ get_current_organization = get_current_entity(ROLE)
 
 
 def signup(data: dtos.OrganizationSignup, db: Session) -> Organization:
+    if data.email == settings.ADMIN_EMAIL:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email reserved for system administrator")
     if db.query(Organization).filter(Organization.email == data.email).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     if db.query(Organization).filter(Organization.name == data.name).first():

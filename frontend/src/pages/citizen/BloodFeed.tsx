@@ -6,6 +6,7 @@ import { apiBaseUrl, acceptRequestMatch } from "../../api/client";
 import { ShareMenu } from "../../components/common/ShareMenu";
 import { EmptyState } from "../../components/common/EmptyState";
 import { UrgencyBadge } from "../../components/common/UrgencyBadge";
+import { LocationAutocomplete } from "../../components/common/LocationAutocomplete";
 // from "../../components/common/EmptyState";
 import { SearchX } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -20,6 +21,9 @@ export function BloodFeed() {
   const [loading, setLoading] = useState(true);
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [cooldownDays, setCooldownDays] = useState<number>(0);
+  const [commitModalReq, setCommitModalReq] = useState<string | null>(null);
+  const [commitUnits, setCommitUnits] = useState(1);
+  const [commitEta, setCommitEta] = useState(2);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -69,6 +73,18 @@ export function BloodFeed() {
   return (
     <div className="p-8 flex flex-col h-full">
       <h1 className="text-2xl font-bold mb-6">Nearby Blood Requests</h1>
+      <div className="mb-6 w-full max-w-md">
+        <LocationAutocomplete 
+          placeholder="Search requests by city..." 
+          onSelect={(lat, lon) => {
+            setUserPos([lat, lon]);
+            setLoading(true);
+            fetch(`${apiBaseUrl}/blood-requests/nearby/for-me?latitude=${lat}&longitude=${lon}&radius_km=50`, {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            }).then(res => { if (!res.ok) throw new Error("Failed"); return res.json(); }).then(data => { if(Array.isArray(data)) setRequests(data); setLoading(false); }).catch(e => { console.error(e); setLoading(false); });
+          }} 
+        />
+      </div>
       
       {requests.length === 0 ? (
         <EmptyState icon={SearchX} title="No nearby requests" description="There are no active blood requests in your area that match your blood type right now." actionText="Refresh Feed" onAction={() => window.location.reload()} />
@@ -137,6 +153,33 @@ export function BloodFeed() {
                 ))}
               </MapContainer>
             )}
+          </div>
+        </div>
+      )}
+
+      {commitModalReq && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">Commit to Donate</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Units to Donate</label>
+                <input type="number" min="1" value={commitUnits} onChange={e => setCommitUnits(parseInt(e.target.value))} className="w-full border border-slate-200 p-2 rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">ETA (Hours)</label>
+                <input type="number" min="1" value={commitEta} onChange={e => setCommitEta(parseInt(e.target.value))} className="w-full border border-slate-200 p-2 rounded-lg" />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setCommitModalReq(null)} className="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium">Cancel</button>
+              <button onClick={() => {
+                const reqId = commitModalReq;
+                setCommitModalReq(null);
+                const etaStr = new Date(Date.now() + commitEta * 60 * 60 * 1000).toISOString();
+                acceptRequestMatch(reqId, commitUnits, etaStr, accessToken || "").then(() => toast.success("Committed!")).catch(e => toast.error(e.message));
+              }} className="px-4 py-2 bg-primary text-white hover:bg-red-700 rounded-lg font-bold">Confirm</button>
+            </div>
           </div>
         </div>
       )}

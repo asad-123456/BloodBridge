@@ -10,8 +10,7 @@ The codebase is in a stable, functioning state. A recent bug-squashing sweep res
 
 ### **Frontend (`frontend/src/`)**
 *   **Framework**: React 19, React Router v7, Vite, Tailwind CSS, TypeScript.
-*   **State Management**: Handled via `AppStateContext.tsx`. 
-    *   *Note for Devs*: The context operates in a **Dual-Mode**. If `isDemoUser` is true (determined by `demoUserIds` in `mockData.ts`), the app runs entirely off `localStorage` mock data. Real API calls are only triggered for live users holding a JWT.
+*   **State Management**: Handled via `AppStateContext.tsx`.
 *   **Health**: Excellent modularization. Pages and routes are clearly separated by role (`/admin`, `/hospital`, `/partner`). API calls in `client.ts` have been recently typed with strict `Promise<T>` generics.
 
 ### **Backend (`backend/src/`)**
@@ -45,7 +44,6 @@ There are currently **zero** automated tests in the repository.
     *   Set up a `pytest` environment with a separate, ephemeral PostgreSQL+PostGIS database.
     *   **Critical paths to test**: Geo-radius matching in `notifications.py`, concurrency locks/IntegrityErrors in `request_matches/controller.py` (preventing double-booking of blood requests), and role-based access control.
 2.  **Frontend (`vitest` / `playwright`)**:
-    *   Since the app has a robust demo mode, you can write Playwright end-to-end tests entirely against the `isDemoUser` mock state without needing a live backend.
     *   Test the complex UI interactions in `AppStateContext.tsx` like hospital verification and partner fulfillment.
 
 ### Task 3: Context Decomposition (Optional but Recommended)

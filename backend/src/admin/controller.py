@@ -8,7 +8,7 @@ from src.donors.models import Donor
 from src.hospitals.models import Hospital
 from src.organizations.models import Organization
 from src.request_matches.models import RequestMatch
-from src.utils.auth import require_roles
+from src.utils.auth import require_roles, Identity
 from src.utils.enums import ApprovalStatus
 from src.utils.helpers import constant_time_equals, create_access_token
 from src.utils.settings import settings
@@ -118,15 +118,20 @@ def list_safety_flags(db: Session) -> list[SafetyFlag]:
     return db.query(SafetyFlag).order_by(SafetyFlag.created_at.desc()).all()
 
 
-def resolve_safety_flag(flag_id: str, data: dtos.SafetyFlagResolution, db: Session, admin_id: str) -> SafetyFlag:
+def resolve_safety_flag(flag_id: str, data: dtos.SafetyFlagResolution, db: Session, identity: "Identity") -> SafetyFlag:
     flag = db.query(SafetyFlag).filter(SafetyFlag.id == flag_id).first()
     if not flag:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Safety flag not found")
     flag.status = data.action
     flag.resolution_note = data.resolution_note
+    
+    actor_name = "Platform administrator"
+    if identity.entity:
+        actor_name = getattr(identity.entity, "name", getattr(identity.entity, "full_name", actor_name))
+
     db.add(AuditEvent(
-        actor_id=admin_id,
-        actor_name="Platform administrator",
+        actor_id=identity.id,
+        actor_name=actor_name,
         action=f"{data.action.capitalize()} safety flag",
         target_type="Safety flag",
         target_id=str(flag.id),

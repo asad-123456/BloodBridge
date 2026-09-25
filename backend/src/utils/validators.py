@@ -1,7 +1,7 @@
 """Reusable Pydantic field types, so validation rules live in one place
 instead of being restated (or forgotten) in every module's DTOs."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Annotated
 
 from pydantic import AfterValidator, Field
@@ -35,7 +35,7 @@ def _must_be_future(value: datetime) -> datetime:
     # rejecting it, so the comparison below never raises on tz mismatch.
     if value.tzinfo is None:
         value = value.replace(tzinfo=timezone.utc)
-    if value <= datetime.now(timezone.utc):
+    if value <= datetime.now(timezone.utc) - timedelta(minutes=5):
         raise ValueError("Must be a timestamp in the future")
     return value
 

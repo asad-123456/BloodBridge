@@ -6,6 +6,7 @@ from geoalchemy2.functions import ST_Distance, ST_DWithin
 from sqlalchemy import func as sa_func
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from src.blood_requests import dtos, notifications
 from src.blood_requests.models import BloodRequest
@@ -67,7 +68,14 @@ def create_request(data: dtos.BloodRequestCreate, db: Session, identity: Identit
         area_label=data.area_label,
     )
     db.add(blood_request)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A request with these details already exists."
+        )
     db.refresh(blood_request)
 
     # A hospital-backed request is PENDING_VERIFICATION at this point: donors
@@ -224,9 +232,13 @@ def list_pending_for_hospital(hospital: Hospital, db: Session) -> list[BloodRequ
     )
 
 
-def list_nearby_for_donor(donor: Donor, latitude: float, longitude: float, radius_km: float, db: Session) -> list[dtos.NearbyBloodRequestOut]:
-    # Use dynamic location from browser
-    search_location = make_point(latitude, longitude)
+def list_nearby_for_donor(donor: Donor, latitude: float | None, longitude: float | None, radius_km: float, db: Session) -> list[dtos.NearbyBloodRequestOut]:
+    if latitude is not None and longitude is not None:
+        search_location = make_point(latitude, longitude)
+    else:
+        if donor.location is None:
+            return []
+        search_location = donor.location
 
 
     if donor.eligible_after and donor.eligible_after > datetime.now(timezone.utc):
@@ -251,7 +263,8 @@ def list_nearby_for_donor(donor: Donor, latitude: float, longitude: float, radiu
         db.query(BloodRequest, distance_expr)
         .filter(BloodRequest.status.in_(OPEN_STATUSES))
         .filter(BloodRequest.blood_type_needed.in_(compatible_recipients))
-        .filter(ST_DWithin(BloodRequest.location, search_location, func.least(radius_km, BloodRequest.current_radius_km) * 1000))
+        .filter(ST_DWithin(BloodRequest.location, search_location, radius_km * 1000))
+        .filter(ST_Distance(BloodRequest.location, search_location) <= BloodRequest.current_radius_km * 1000)
         .filter(BloodRequest.id.notin_(already_committed))
         .order_by(distance_expr.asc())
         .all()

@@ -53,7 +53,7 @@ def resolve_safety_flag(
     db: Session = Depends(get_db),
     admin: Identity = Depends(get_current_admin),
 ):
-    return controller.resolve_safety_flag(flag_id, data, db, admin.id)
+    return controller.resolve_safety_flag(flag_id, data, db, admin)
 
 
 @router.get("/audit-events", response_model=list[dtos.AuditEventOut])

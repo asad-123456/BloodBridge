@@ -1,4 +1,4 @@
-# HemaLink Changelog
+# BloodBridge Changelog
 
 This changelog records the changes made after the MVP frontend version to improve professional quality, security posture, and production readiness.
 

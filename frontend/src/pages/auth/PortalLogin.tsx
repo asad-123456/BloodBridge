@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { ArrowRight, Droplet, LockKeyhole } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
@@ -43,7 +43,14 @@ const config: Record<
 
 export function PortalLogin({ role }: { role: PortalRole }) {
   const navigate = useNavigate();
-  const { loginWithBackend } = useAuth();
+  const { loginWithBackend, user } = useAuth();
+  
+  useEffect(() => {
+    if (user && user.isActive) {
+      navigate(`/${user.role.toLowerCase()}`);
+    }
+  }, [user, navigate]);
+
   const settings = config[role];
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -83,12 +90,12 @@ export function PortalLogin({ role }: { role: PortalRole }) {
         </p>
         {role !== "Admin" && (
           <p className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm leading-5 text-slate-600">
-            Need to register your institution?{" "}
+            {role === "Citizen" ? "Don't have an account? " : "Need to register your institution? "}
             <Link
               to={`/${role.toLowerCase()}/signup`}
               className="font-bold text-primary hover:underline"
             >
-              Apply here
+              {role === "Citizen" ? "Sign up here" : "Apply here"}
             </Link>
             .
           </p>

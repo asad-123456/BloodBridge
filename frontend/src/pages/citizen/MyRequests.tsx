@@ -28,7 +28,7 @@ export function MyRequests() {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-6">My Blood Requests</h1>
-      {loading ? (<div className="flex h-[30vh] items-center justify-center p-8"><div className="flex flex-col items-center gap-3"><div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary border-r-primary"></div><p className="text-sm font-semibold text-slate-500">Loading requests...</p></div></div>) : requests.length === 0 ? <EmptyState icon={FileX} title="No requests created" description="You have not created any blood requests. When you do, they will appear here." actionText="Create a Request" onAction={() => window.location.href = "/citizen/create-request"} /> : (
+      {loading ? (<div className="flex h-[30vh] items-center justify-center p-8"><div className="flex flex-col items-center gap-3"><div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary border-r-primary"></div><p className="text-sm font-semibold text-slate-500">Loading requests...</p></div></div>) : requests.length === 0 ? <EmptyState icon={FileX} title="No requests created" description="You have not created any blood requests. When you do, they will appear here." actionText="New Request" onAction={() => window.location.href = "/citizen/new-request"} /> : (
         <div className="grid gap-4 md:grid-cols-2">
           {requests.map(req => (
             <div key={req.id} className="bg-white p-6 rounded-xl border flex flex-col">

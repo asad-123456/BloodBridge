@@ -34,7 +34,7 @@
 ### 3.1 App Header & Branding
 
 - Displays the **BloodBridge logo** (Red droplet glyph + bold typography) on the top-left.
-- Right section features a **Portal Switcher Dropdown** (`Admin Portal`, `Hospital Portal`, `Partner Portal`) for easy evaluator demonstrations, user profile avatar, and notifications bell.
+- Right section features a **Portal Switcher Dropdown** (`Admin Portal`, `Hospital Portal`, `Partner Portal`), user profile avatar, and notifications bell.
 
 ### 3.2 Sidebar Navigation
 

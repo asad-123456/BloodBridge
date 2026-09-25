@@ -34,8 +34,8 @@ def create_request(
 
 @router.get("/nearby/for-me", response_model=list[dtos.NearbyBloodRequestOut])
 def list_nearby_for_donor(
-    latitude: float,
-    longitude: float,
+    latitude: float | None = None,
+    longitude: float | None = None,
     radius_km: float = 50.0,
     donor: Donor = Depends(get_current_donor),
     db: Session = Depends(get_db)

@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2, Droplet, UserPlus } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import { LocationAutocomplete } from "../../components/common/LocationAutocomplete";
+import toast from "react-hot-toast";
 import { signupHospital, signupOrganization } from "../../api/client";
 
 const config: Record<
@@ -34,6 +36,7 @@ export function PortalSignup({ role }: { role: "Hospital" | "Partner" }) {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [position, setPosition] = useState<[number, number] | null>(null);
   const [licenseNumber, setLicenseNumber] = useState("");
   const [facilityType, setFacilityType] = useState(
     role === "Hospital" ? "Tertiary Care Hospital" : "Blood Bank"
@@ -48,14 +51,19 @@ export function PortalSignup({ role }: { role: "Hospital" | "Partner" }) {
     setError("");
 
     try {
+      if (!position) {
+        toast.error("Please select a location from the address dropdown.");
+        setIsSubmitting(false);
+        return;
+      }
       const payload = {
         name,
         email: email.trim(),
         password,
         phone,
         address,
-        latitude: 24.8607, // Default geo coordinates for UI simplicity
-        longitude: 67.0011,
+        latitude: position[0],
+        longitude: position[1],
         license_number: licenseNumber,
         facility_type: facilityType,
         contact_person_name: contactPersonName,
@@ -143,12 +151,18 @@ export function PortalSignup({ role }: { role: "Hospital" | "Partner" }) {
 
             <label className="block text-sm font-bold text-slate-700">
               Facility Type
-              <input
+              <select
                 value={facilityType}
                 onChange={(e) => setFacilityType(e.target.value)}
                 required
-                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-normal outline-none focus:border-primary"
-              />
+                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-normal outline-none focus:border-primary bg-white"
+              >
+                <option value="Tertiary Care Hospital">Tertiary Care Hospital</option>
+                <option value="General Hospital">General Hospital</option>
+                <option value="Blood Bank">Blood Bank</option>
+                <option value="Clinic">Clinic</option>
+                <option value="Charity/Welfare">Charity/Welfare</option>
+              </select>
             </label>
 
             <label className="block text-sm font-bold text-slate-700">
@@ -161,15 +175,21 @@ export function PortalSignup({ role }: { role: "Hospital" | "Partner" }) {
               />
             </label>
 
-            <label className="block text-sm font-bold text-slate-700 sm:col-span-2">
-              Address
-              <input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                required
-                className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-normal outline-none focus:border-primary"
-              />
-            </label>
+            <div className="sm:col-span-2 z-10 relative">
+              <label className="block text-sm font-bold text-slate-700">
+                Facility Location Search
+              </label>
+              <div className="mt-2 font-normal">
+                <LocationAutocomplete 
+                  placeholder="Search and select facility address..."
+                  onSelect={(lat, lon, name) => {
+                    setPosition([lat, lon]);
+                    setAddress(name);
+                  }}
+                />
+              </div>
+              {address && position && <p className="text-xs text-green-600 mt-2">Selected: {address}</p>}
+            </div>
 
             <label className="block text-sm font-bold text-slate-700">
               Contact Person Name

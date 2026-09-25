@@ -1,7 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
@@ -59,6 +59,7 @@ async def lifespan(app: FastAPI):
         shutdown_scheduler()
 
 
+
 app = FastAPI(
     title="BloodBridge",
     version="0.1.0",
@@ -69,6 +70,15 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    import logging
+    logging.error(f"Validation Error: {exc.errors()} - Body: {exc.body}")
+    return JSONResponse(status_code=422, content={"detail": exc.errors()})
+
 
 # Explicit origins, not "*": the previous wildcard-plus-credentials pair is
 # rejected outright by browsers, and the API authenticates with bearer tokens

@@ -1,3 +1,5 @@
+import { EmptyState } from "../../components/common/EmptyState";
+import { Inbox } from "lucide-react";
 import type { RequestMatchOut } from "../../types";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/useAuth";
@@ -25,7 +27,7 @@ export function MyCommitments() {
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-6">My Commitments</h1>
             {commitments.length === 0 ? (
-        <p className="text-slate-500">No commitments yet.</p>
+        <EmptyState icon={Inbox} title="No commitments yet" description="You have not committed to any blood requests." actionText="Find requests" onAction={() => window.location.href="/citizen"} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {commitments.map(com => (

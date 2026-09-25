@@ -20,6 +20,9 @@ class DonorSignup(BaseModel):
     phone: Phone
     password: Password
     blood_type: BloodType
+    latitude: Latitude
+    longitude: Longitude
+    address: Label
 
 
 class DonorLogin(BaseModel):

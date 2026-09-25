@@ -1,3 +1,5 @@
+import { EmptyState } from "../../components/common/EmptyState";
+import { Inbox } from "lucide-react";
 import { Clock3 } from "lucide-react";
 import { useAppState } from "../../context/useAppState";
 import { Header, RequestRow } from "./HospitalShared";
@@ -10,7 +12,7 @@ export function VerificationQueue() {
   return (
     <>
       <Header title="Verification queue" description={`Only requests declared at ${facility?.name ?? "your facility"} appear here.`} />
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center gap-2 px-5 py-4"><Clock3 size={18} className="text-primary" /><h2 className="font-bold text-slate-900">{queue.length} request{queue.length === 1 ? "" : "s"} awaiting review</h2></div>{queue.map((request) => <RequestRow key={request.id} request={request} />)}{queue.length === 0 && <p className="border-t border-slate-100 px-5 py-10 text-center text-sm text-slate-500">The queue is clear.</p>}</div>
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm"><div className="flex items-center gap-2 px-5 py-4"><Clock3 size={18} className="text-primary" /><h2 className="font-bold text-slate-900">{queue.length} request{queue.length === 1 ? "" : "s"} awaiting review</h2></div>{queue.map((request) => <RequestRow key={request.id} request={request} />)}{queue.length === 0 && <EmptyState icon={Inbox} title="The queue is clear" description="No requests currently need verification." />}</div>
     </>
   );
 }

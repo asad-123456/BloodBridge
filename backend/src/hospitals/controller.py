@@ -7,6 +7,7 @@ from src.utils import accounts
 from src.utils.auth import get_current_entity
 from src.utils.cloudinary_utils import upload_image
 from src.utils.geo import make_point
+from src.utils.settings import settings
 from src.utils.helpers import create_access_token, hash_password, verify_password
 
 ROLE = "hospital"
@@ -15,6 +16,8 @@ get_current_hospital = get_current_entity(ROLE)
 
 
 def signup(data: dtos.HospitalSignup, db: Session) -> Hospital:
+    if data.email == settings.ADMIN_EMAIL:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email reserved for system administrator")
     if db.query(Hospital).filter(Hospital.email == data.email).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     if db.query(Hospital).filter(Hospital.name == data.name).first():

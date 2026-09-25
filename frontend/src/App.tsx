@@ -14,7 +14,7 @@ import { PortalSignup } from "./pages/auth/PortalSignup";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { HospitalLayout } from "./layouts/HospitalLayout";
 import { PartnerLayout } from "./layouts/PartnerLayout";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { HospitalRoutes } from "./pages/hospital/HospitalRoutes";
 import { PortalLogin } from "./pages/auth/PortalLogin";
 import { AdminRoutes } from "./pages/admin/AdminRoutes";
@@ -243,8 +243,14 @@ function ProtectedPortal({
   children: ReactNode;
 }) {
   const { user, logout } = useAuth();
+  
+  useEffect(() => {
+    if (user && !user.isActive) {
+      logout();
+    }
+  }, [user, logout]);
+
   if (!user || !user.isActive) {
-    if (user) logout();
     return <Navigate to={`/${role.toLowerCase()}/login`} replace />;
   }
   if (user.role !== role)
@@ -316,9 +322,8 @@ function AppRoutes() {
 }
 
 function AppStateBoundary() {
-  const { user } = useAuth();
   return (
-    <AppStateProvider key={user?.id ?? "logged-out"}>
+    <AppStateProvider>
       <AppRoutes />
     </AppStateProvider>
   );

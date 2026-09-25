@@ -25,7 +25,6 @@ BloodBridge is built with strict real-world medical rules to ensure safety and r
 *   **The 90-Day Cooldown:** Donors are mathematically locked out of the matching pool for 3 months after a successful donation to protect their health.
 *   **Reliability Scoring (Flake Penalties):** Donors who accept an emergency request but fail to show up are automatically penalized in the algorithm, prioritizing highly reliable donors for future emergencies.
 *   **Spam Prevention:** Only "Emergency" requests trigger mass push notifications. "Routine" requests are quietly routed to institutional dashboards to prevent mobile notification fatigue.
-*   **Dual-Mode Interface:** The web portals can be instantly switched into "Demo Mode" for training hospital staff offline without polluting the live database.
 
 ---
 
@@ -84,17 +83,6 @@ If you are developing the React Native / Flutter consumer mobile app, the backen
 
 ---
 
-## Demo Accounts
-
-For offline UI testing and evaluator demonstrations, use the seeded demo credentials. These mock the UI without hitting the live database:
-
-| Portal | Email | Password |
-|---|---|---|
-| **Admin** | `demo_admin@hemalink.com` | `DemoAdmin@123` |
-| **Hospital** | `demo_hospital@hemalink.com` | `DemoHospital@123` |
-| **Partner** | `demo_partner@hemalink.com` | `DemoPartner@123` |
-
----
 
 ## Documentation
 

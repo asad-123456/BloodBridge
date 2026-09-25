@@ -2,21 +2,43 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/useAuth";
 import { apiBaseUrl } from "../../api/client";
 import { useNavigate } from "react-router-dom";
+import { LocationAutocomplete } from "../../components/common/LocationAutocomplete";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { setupLeafletIcons } from "../../utils/leafletIcons";
 
 setupLeafletIcons();
 
-function LocationMarker({ position, setPosition }: {
+function LocationMarker({ position, setPosition, setAddress }: {
   position: [number, number] | null;
   setPosition: (pos: [number, number]) => void;
+  setAddress?: (label: string) => void;
 }) {
-  useMapEvents({
-    click(e) {
-      setPosition([e.latlng.lat, e.latlng.lng]);
+  const map = useMapEvents({
+    async click(e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      setPosition([lat, lng]);
+      
+      if (setAddress) {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          if (res.ok) {
+            const data = await res.json();
+            // Use hospital name, or neighborhood, or fallback to city
+            const label = data.address?.hospital || data.address?.neighbourhood || data.address?.city || data.display_name;
+            if (label) setAddress(label);
+          }
+        } catch (err) {
+          console.error("Geocoding failed", err);
+        }
+      }
     },
   });
+
+  useEffect(() => {
+    if (position) map.setView(position, map.getZoom());
+  }, [position, map]);
 
   return position === null ? null : <Marker position={position}></Marker>;
 }
@@ -28,20 +50,25 @@ export function CreateRequest() {
   const [units, setUnits] = useState(1);
   const [urgency, setUrgency] = useState("urgent");
   const [patientName, setPatientName] = useState("");
-  const [areaLabel, setAreaLabel] = useState("");
-  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [hospitalName, setHospitalName] = useState("");
+    const [phone, setPhone] = useState("");
   const [requiredBy, setRequiredBy] = useState("");
   const [submitting, setSubmitting] = useState(false);
   
   // Default to Lahore, Pakistan
-  const [position, setPosition] = useState<[number, number] | null>([31.5204, 74.3587]);
+  const [position, setPosition] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setPosition([pos.coords.latitude, pos.coords.longitude]),
-        () => {}
+        () => { setPosition([24.8607, 67.0011]); }, // fallback on error/deny
+        { timeout: 5000 }
       );
+    } else {
+      setPosition([24.8607, 67.0011]);
     }
   }, []);
 
@@ -70,7 +97,8 @@ export function CreateRequest() {
           units_needed: units,
           urgency_level: urgency,
           patient_name: patientName,
-          area_label: areaLabel,
+          area_label: [address, landmark].filter(Boolean).join(", "),
+          hospital_name: hospitalName || null,
           required_by: new Date(requiredBy).toISOString(),
           latitude: position[0],
           longitude: position[1],
@@ -101,8 +129,16 @@ export function CreateRequest() {
               <input id="patientName" type="text" value={patientName} onChange={e => setPatientName(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
-              <label htmlFor="areaLabel" className="block text-sm font-bold mb-1">Area Label (e.g. City Hospital)</label>
-              <input id="areaLabel" type="text" value={areaLabel} onChange={e => setAreaLabel(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+              <label htmlFor="address" className="block text-sm font-bold mb-1">Address *</label>
+              <input id="address" type="text" value={address} onChange={e => setAddress(e.target.value)} required placeholder="123 Main St" className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+            </div>
+            <div>
+              <label htmlFor="landmark" className="block text-sm font-bold mb-1">Landmark (Optional)</label>
+              <input id="landmark" type="text" value={landmark} onChange={e => setLandmark(e.target.value)} placeholder="Near Central Park" className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="hospitalName" className="block text-sm font-bold mb-1">Hospital / Clinic Name (Optional)</label>
+              <input id="hospitalName" type="text" value={hospitalName} onChange={e => setHospitalName(e.target.value)} placeholder="City General Hospital" className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
               <label htmlFor="contactPhone" className="block text-sm font-bold mb-1">Contact Phone</label>
@@ -138,14 +174,27 @@ export function CreateRequest() {
           <div className="flex flex-col h-full">
             <label className="block text-sm font-bold mb-2">Pinpoint Location</label>
             <p className="text-xs text-slate-500 mb-2">Tap on the map to set the exact location where blood is needed.</p>
-            <div className="flex-1 min-h-[300px] border border-slate-200 rounded-lg overflow-hidden relative z-0">
-              {position && (
+            <div className="flex-1 min-h-[300px] flex flex-col border border-slate-200 rounded-lg relative z-0">
+              <div className="p-2 bg-white border-b border-slate-200 z-10 relative">
+                <LocationAutocomplete 
+                  onSelect={(lat, lon, name) => {
+                    setPosition([lat, lon]);
+                    setAddress(name);
+                  }}
+                  placeholder="Search city, neighborhood, or landmark..."
+                />
+              </div>
+              {position === null ? (
+                <div className="h-full w-full bg-slate-100 flex items-center justify-center text-slate-400 flex-1">
+                  <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mr-3"></div> Loading map...
+                </div>
+              ) : (
                 <MapContainer center={position} zoom={13} style={{ height: "100%", width: "100%" }}>
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution="&copy; OpenStreetMap contributors"
                   />
-                  <LocationMarker position={position} setPosition={setPosition} />
+                  <LocationMarker position={position} setPosition={setPosition} setAddress={setAddress} />
                 </MapContainer>
               )}
             </div>
