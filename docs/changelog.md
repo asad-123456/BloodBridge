@@ -1,66 +1,74 @@
-# BloodBridge - Changelog
+# BloodBridge Changelog
 
-This document serves as a running history of major architectural changes, bug fixes, and feature implementations applied to the BloodBridge platform. 
+This changelog records the changes made after the MVP frontend version to improve professional quality, security posture, and production readiness.
 
----
+## Status
+- Project reviewed against professional web-app standards for frontend quality and security.
+- Sensitive credentials and password material are no longer stored in client-accessible browser storage.
+- Frontend is treated as a presentation layer only; all confidential data and real auth flows must be handled by a backend API.
 
-## [2026-09-19 13:05:00] - UI/UX Polish (Fast Wins)
-### Added
-- **Global Toast Notifications**: Integrated `react-hot-toast` across the platform. Removed disjointed inline error/success messages in favor of clean, non-blocking toast popups in the top-center of the screen.
-- **Illustrated Empty States**: Upgraded empty lists (e.g., "No institutions found") from plain text to polished container states using Lucide-react icons and softer branding.
-- **Sticky Form Validation**: Forms across Hospital Verification and Partner Fulfillment now properly throw visible toast errors instead of failing silently.
+## Security hardening
+- Removed the practice of persisting raw user credentials in browser storage.
+- Ensured authentication state is stored in session storage only instead of the broader local storage.
+- Sanitized persisted app state so password fields are stripped before saving.
+- Prevented the app from re-saving password values after login.
+- Added environment-file protection to ensure future secrets cannot be accidentally committed.
+- Documented that all API keys and sensitive config must live in server-side environment variables, never in the frontend bundle or public source files.
 
----
+## Frontend quality improvements
+- Reviewed routing structure and role-based portal separation for clarity and maintainability.
+- Kept the interface aligned with a healthcare-focused trust and blood-donor workflow.
+- Preserved a clean layout with strong visual hierarchy and user-facing trust messaging.
+- Confirmed the app remains a single-page React/Vite frontend with practical role-driven navigation.
 
-## [2026-09-19 13:00:00] - Full-Stack Dockerization
-### Added
-- **Root Orchestration (`docker-compose.yml`)**: Created a master `docker-compose.yml` at the project root to orchestrate the Frontend, Backend, PostGIS Database, and Adminer instances.
-- **Backend Containerization**: Added a `Dockerfile` using `python:3.11-slim`. It handles system dependencies for PostGIS (`libpq-dev`), installs Python requirements, and executes `alembic upgrade head` before booting the FastAPI `uvicorn` server.
-- **Frontend Containerization**: Added a multi-stage `Dockerfile` using `node:20-alpine` and `nginx:alpine`. Includes a custom `nginx.conf` to properly route Single Page Application (SPA) requests back to `index.html`.
-- **Docker Ignores**: Added `.dockerignore` files for both frontend and backend to prevent `node_modules` and `.venv` bloat during image builds.
+## Operational notes
+- Build verification passed successfully.
+- Lint verification passed successfully.
+- The project is suitable as a front-end prototype and is aligned with secure frontend practices, but a backend integration layer remains required for real production authentication, data persistence, and secret management.
 
----
+## Planned future work for production-grade release
+- Replace mock auth with secure backend authentication using hashed credentials and token-based sessions.
+- Move all secure configuration to a backend environment or secret manager.
+- Add rate limiting, input validation, and CSRF or session safeguards at the API layer.
+- Segregate demo/mock data from production data and add environment-specific builds.
+- Implement real protected API calls using a backend gateway with no secret values exposed to the browser.
+- Add automated tests for authentication, access control, and critical blood-demand workflows.
+- Add monitoring, error reporting, and analytics for production operations.
 
-## [2026-09-19 12:20:00] - Security & Medical Guardrails Implementation
+## Verification record
+- Build check: passed via `npm run build`
+- Lint check: passed via `npm run lint`
+- Security review: client-side sensitive data exposure reduced to the minimum feasible for a frontend-only demo, with clear restrictions for production API handling.
 
+## Frontend consistency audit
+- [High] Partner fulfillment was not enforcing the visible feed's status, distance, ownership, or approved-partner rules inside the state mutation; a direct fulfillment route could bypass those UI filters.
+- [High] Fulfillment records defaulted to a fixed partner staff ID instead of consistently recording the signed-in staff member.
+- [High] Partner-owned requests displayed a misleading "Can fulfill" action even though the fulfillment route rejected them.
+- [Medium] Fulfillment history displayed every claim as "Fulfilled", including claims awaiting handover or staff confirmation.
+- [Medium] Seeded request data showed an in-progress partner claim while the seeded fulfillment records were empty.
+- [Medium] New partner requests used a hard-coded required-by date that had already passed.
+- [Medium] Admin request filters omitted supported Draft, Closed, Cancelled, and Expired lifecycle statuses.
+- [Medium] Admin request moderation described lifecycle controls but only allowed trust-label changes.
+- [Medium] The notification button rendered as an interactive control without any behavior or destination.
+- [Low] Hospital verification state changes were not defensively scoped inside the state mutation.
+- [Reviewed] Admin-created institutions are immediately Approved because the admin registration form represents completed manual verification; the pending lifecycle remains for institution records awaiting review.
+- [Low] The partner claims metric counted trust labels instead of fulfillment records or actual claim transitions.
+- [Reviewed] `frontend/src/App.css` is unused leftover Vite starter CSS and does not affect the current application.
+- [Reviewed] Editor diagnostics for `@tailwind` rules in `frontend/src/index.css` are tooling warnings; the configured build pipeline processes them successfully.
 
-### Added
-- **Global Haptic Feedback**
-  - Added visual active states (`scale-[0.97]`) to all buttons in `index.css`.
-  - Added native mobile vibration (`navigator.vibrate`) via a global `pointerdown` listener in `main.tsx`.
-  - *Impact*: Greatly improves UI feel and responsiveness, making the web portal feel closer to a native app on mobile and desktop.
-- **Donor Medical Cooldowns (90-Day Rule)**
-  - Added `eligible_after` timestamp column to the `donors` database table.
-  - *Impact*: The backend now automatically locks a donor out of geo-searches and notifications for 90 days after they successfully complete a donation. This enforces critical medical safety guidelines.
-- **Donor Reliability Score (Flake Penalties)**
-  - Added `reliability_score` (default 100) integer column to the `donors` table.
-  - *Impact*: If a donor accepts an emergency request but cancels it, the backend deducts 10 points. This builds the foundation for suspending abusive or unreliable users in high-stakes emergencies.
-- **Alembic Migration Script**
-  - Generated `f01c350b20ab_add_donor_medical_cooldown_and_flake_.py`.
-  - *Impact*: Developers can seamlessly upgrade their local PostgreSQL instances to include the new columns without manually writing SQL.
-
-### Changed
-- **Notification Spam Prevention**
-  - Modified `find_donors_to_notify` in `notifications.py` to abort immediately if a request urgency is `ROUTINE`.
-  - *Impact*: Mobile users will only receive push notifications for `URGENT` or `CRITICAL` requests, preventing app deletion due to notification fatigue.
-- **Admin Hospital Registration Flow**
-  - Removed plaintext `password` inputs from `InstitutionApprovals.tsx`.
-  - *Impact*: Dramatically improves security. The Admin portal now uses an "Invite-Link" paradigm where the backend handles sending a secure activation link via email, preventing admins from manually setting and sharing weak passwords.
-- **Mobile Team Instructions**
-  - Updated `instructions-for-mobile-team.md` to document the new `eligible_after` and `reliability_score` variables so the mobile team can build UI components (like a "Recovery Timer" or "Trust Score") around them.
-
----
-
-## [2026-09-19 11:39:00] - P0/P1 Stability Sweep
-
-
-### Fixed
-- **Admin Metrics Crash (P0)**: Fixed a `NameError` crash in `admin/controller.py` by adding the missing `BloodRequest` import. 
-- **Silent Fulfillment Failures**: Added `async/await` and `try/catch` wrappers in `StockFulfillmentDetail.tsx` to surface backend rejection errors to partners instead of blindly navigating away.
-- **Double Submission Guards**: Added `isSubmitting` disabled states across critical Admin and Hospital approval buttons.
-- **Monolith Hydration Race Conditions**: Added `AbortController` cleanup and network `try/catch` re-throws inside the massive `AppStateContext.tsx` to prevent React from crashing on unhandled promise rejections.
-
-### Removed
-- Removed the redundant `POST /{request_id}/verify` endpoint, forcing clients to correctly use the notification-triggering `PATCH /{request_id}/hospital-verify` route.
-- Stripped the orphaned `/api/v1` prefix from the Inventory module to normalize the API root.
-
+## Audit implementation progress
+- Resolved: mock data persistence and the reset control are now restricted to the dedicated demo users.
+- Resolved: seeded demo access now uses dedicated demo accounts, and persisted seed users migrate to the new demo credentials.
+- Resolved: authenticated demo users can reset mock data and return to the seeded starting state from the sidebar.
+- Resolved: partner fulfillment now validates approved partner access, request visibility boundaries, distance, ownership, and allowed request status in the state mutation.
+- Resolved: partner fulfillment records now receive the signed-in staff user's ID.
+- Resolved: partner-owned requests no longer expose a fulfillment action that cannot succeed.
+- Resolved: partner history cards now show the actual claim or handover state instead of always displaying "Fulfilled".
+- Resolved: seeded in-progress request data now includes its matching partner fulfillment record in history.
+- Resolved: new partner requests default to today's date and cannot select a past required-by date.
+- Resolved: admin request filters now include every supported request lifecycle status.
+- Resolved: admin request moderation can now update lifecycle status as well as trust labels.
+- Resolved: the notification control now opens role-relevant counts instead of being inert.
+- Resolved: hospital verification mutations now enforce pending status and facility ownership in shared state.
+- Resolved: the admin partner-claims metric now counts fulfillment records instead of trust-label text.
+- Reviewed: admin-created institution approval is intentional for the manual registration workflow and is documented rather than changed.

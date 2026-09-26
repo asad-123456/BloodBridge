@@ -121,7 +121,10 @@ def update_fulfillment(match_id: str, org: Organization, action: str, db: Sessio
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Handover must be recorded first")
         match.confirmed_at = datetime.now(timezone.utc)
         match.status = MatchStatus.COMPLETED
-        blood_requests_controller.mark_fulfilled_if_complete(match.blood_request_id, db)
+
+        request_obj = db.query(BloodRequest).filter(BloodRequest.id == match.blood_request_id).first()
+        if request_obj:
+            blood_requests_controller.mark_fulfilled_if_complete(request_obj, db)
         match.completed_at = match.confirmed_at
     db.commit()
     db.refresh(match)

@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/useAuth";
 import { apiBaseUrl } from "../../api/client";
@@ -56,6 +57,12 @@ export function CreateRequest() {
     const [phone, setPhone] = useState("");
   const [requiredBy, setRequiredBy] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Calculate minimum time (15 minutes from now)
+  const minTime = new Date(Date.now() + 15 * 60 * 1000);
+  minTime.setMinutes(minTime.getMinutes() - minTime.getTimezoneOffset());
+  const minTimeString = minTime.toISOString().slice(0, 16);
+
   
   // Default to Lahore, Pakistan
   const [position, setPosition] = useState<[number, number] | null>(null);
@@ -75,13 +82,19 @@ export function CreateRequest() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!position) return;
-        
 
     const dateObj = new Date(requiredBy);
     if (isNaN(dateObj.getTime())) {
-      alert("Please select a valid date for Required By");
+      toast.error("Please select a valid date for Required By");
       return;
     }
+    const diffMins = (dateObj.getTime() - Date.now()) / (1000 * 60);
+    if (diffMins < 15) {
+      toast.error("The required time must be at least 15 minutes from now.");
+      return;
+    }
+
+        
 
     setSubmitting(true);
 
@@ -156,7 +169,7 @@ export function CreateRequest() {
             </div>
             <div>
               <label htmlFor="requiredBy" className="block text-sm font-bold mb-1">Required By</label>
-              <input id="requiredBy" type="datetime-local" value={requiredBy} onChange={e => setRequiredBy(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
+              <input id="requiredBy" type="datetime-local" min={minTimeString} value={requiredBy} onChange={e => setRequiredBy(e.target.value)} required className="w-full border border-slate-200 bg-white p-2.5 rounded-lg focus:border-primary outline-none" />
             </div>
             <div>
               <label htmlFor="urgency" className="block text-sm font-bold mb-1">Urgency</label>

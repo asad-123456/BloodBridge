@@ -50,6 +50,16 @@ def _strip(value: str) -> str:
 Password = Annotated[str, AfterValidator(_check_password_strength)]
 FutureDatetime = Annotated[datetime, AfterValidator(_must_be_future)]
 
+def _must_be_15_mins_future(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    if value < datetime.now(timezone.utc) + timedelta(minutes=15):
+        raise ValueError("Required time must be at least 15 minutes from now")
+    return value
+
+RequiredByDatetime = Annotated[datetime, AfterValidator(_must_be_15_mins_future)]
+
+
 Latitude = Annotated[float, Field(ge=-90, le=90)]
 Longitude = Annotated[float, Field(ge=-180, le=180)]
 

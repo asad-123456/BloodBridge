@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from src.utils.constants import MAX_RADIUS_KM, MIN_RADIUS_KM
 from src.utils.enums import BloodType, RequestStatus, UrgencyLevel
 from src.utils.validators import (
-    FutureDatetime,
+    FutureDatetime, RequiredByDatetime,
     Label,
     Latitude,
     Longitude,
@@ -26,7 +26,7 @@ class BloodRequestCreate(BaseModel):
     units_needed: Units
     urgency_level: UrgencyLevel
     matches: list[MatchSummary] = []
-    required_by: FutureDatetime
+    required_by: RequiredByDatetime
     hospital_name: Name | None = None  # free text; matched against registered hospitals server-side
     contact_phone: Phone
     latitude: Latitude

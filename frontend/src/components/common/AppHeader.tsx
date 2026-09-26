@@ -134,7 +134,7 @@ export function AppHeader() {
               </button>
             </div>
             <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-              {user && navigation[user.role as keyof typeof navigation].map((item: any) => {
+              {user && navigation[user.role.toLowerCase() as keyof typeof navigation].map((item: any) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path || (item.path !== `/${user.role}` && location.pathname.startsWith(item.path));
                 return (
