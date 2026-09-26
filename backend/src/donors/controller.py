@@ -29,7 +29,7 @@ def signup(data: dtos.DonorSignup, db: Session, background_tasks: BackgroundTask
         phone=data.phone,
         password_hash=hash_password(data.password),
         blood_type=data.blood_type,
-        location=make_point(data.latitude, data.longitude),
+        location=make_point(data.latitude, data.longitude) if data.latitude is not None and data.longitude is not None else None,
         area_label=data.address,
     )
     db.add(donor)

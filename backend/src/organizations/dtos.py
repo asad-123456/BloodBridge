@@ -49,6 +49,8 @@ class OrganizationOut(BaseModel):
     is_email_verified: bool
     created_at: datetime
 
+    latitude: float | None = None
+    longitude: float | None = None
 
 class TokenOut(BaseModel):
     access_token: str

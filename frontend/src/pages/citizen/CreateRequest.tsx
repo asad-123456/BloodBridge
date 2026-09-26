@@ -175,7 +175,7 @@ export function CreateRequest() {
             <label className="block text-sm font-bold mb-2">Pinpoint Location</label>
             <p className="text-xs text-slate-500 mb-2">Tap on the map to set the exact location where blood is needed.</p>
             <div className="flex-1 min-h-[300px] flex flex-col border border-slate-200 rounded-lg relative z-0">
-              <div className="p-2 bg-white border-b border-slate-200 z-10 relative">
+              <div className="p-2 bg-white border-b border-slate-200 z-[1000] relative">
                 <LocationAutocomplete 
                   onSelect={(lat, lon, name) => {
                     setPosition([lat, lon]);

@@ -88,3 +88,35 @@ class BloodRequest(Base):
 
 
 
+
+    @property
+    def latitude(self) -> float | None:
+        if self.location is None:
+            return None
+        from geoalchemy2.shape import to_shape
+        shape = to_shape(self.location)
+        return shape.y
+
+    @property
+    def longitude(self) -> float | None:
+        if self.location is None:
+            return None
+        from geoalchemy2.shape import to_shape
+        shape = to_shape(self.location)
+        return shape.x
+
+    @property
+    def latitude(self) -> float | None:
+        if self.location is None:
+            return None
+        from geoalchemy2.shape import to_shape
+        shape = to_shape(self.location)
+        return shape.y
+
+    @property
+    def longitude(self) -> float | None:
+        if self.location is None:
+            return None
+        from geoalchemy2.shape import to_shape
+        shape = to_shape(self.location)
+        return shape.x

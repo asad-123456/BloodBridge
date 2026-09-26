@@ -231,7 +231,7 @@ export function UserSignup() {
               />
             </div>
             <div className="flex-1 flex flex-col min-h-[300px] border border-slate-200 rounded-lg relative z-0">
-              <div className="p-2 bg-white border-b border-slate-200 z-20 relative">
+              <div className="p-2 bg-white border-b border-slate-200 z-[1000] relative">
                   <LocationAutocomplete 
                     placeholder="Search city or area..."
                     onSelect={(lat, lon, name) => {

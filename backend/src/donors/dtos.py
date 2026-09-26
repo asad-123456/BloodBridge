@@ -20,9 +20,9 @@ class DonorSignup(BaseModel):
     phone: Phone
     password: Password
     blood_type: BloodType
-    latitude: Latitude
-    longitude: Longitude
-    address: Label
+    latitude: Latitude | None = None
+    longitude: Longitude | None = None
+    address: Label | None = None
 
 
 class DonorLogin(BaseModel):
@@ -31,8 +31,8 @@ class DonorLogin(BaseModel):
 
 
 class DonorUpdateLocation(BaseModel):
-    latitude: Latitude
-    longitude: Longitude
+    latitude: Latitude | None = None
+    longitude: Longitude | None = None
     area_label: Label
 
 
@@ -60,6 +60,8 @@ class DonorOut(BaseModel):
     reliability_score: int
     created_at: datetime
 
+    latitude: float | None = None
+    longitude: float | None = None
 
 class TokenOut(BaseModel):
     access_token: str

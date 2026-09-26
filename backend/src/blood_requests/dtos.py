@@ -70,6 +70,8 @@ class BloodRequestOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    latitude: float | None = None
+    longitude: float | None = None
 
 class NearbyBloodRequestOut(BloodRequestOut):
     distance_km: float

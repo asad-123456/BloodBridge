@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
 import type { BloodRequestOut, UrgencyLevel } from "../../types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/useAuth";
 import { apiBaseUrl, acceptRequestMatch } from "../../api/client";
 import { ShareMenu } from "../../components/common/ShareMenu";
@@ -9,21 +9,72 @@ import { UrgencyBadge } from "../../components/common/UrgencyBadge";
 import { LocationAutocomplete } from "../../components/common/LocationAutocomplete";
 // from "../../components/common/EmptyState";
 import { SearchX } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { setupLeafletIcons } from "../../utils/leafletIcons";
 
 setupLeafletIcons();
 
+
+function SearchLocationMarker({ position, setPosition, onLocationUpdate }: {
+  position: [number, number] | null;
+  setPosition: (pos: [number, number]) => void;
+  onLocationUpdate: (lat: number, lon: number) => void;
+}) {
+  const map = useMapEvents({
+    async click(e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      setPosition([lat, lng]);
+      onLocationUpdate(lat, lng);
+    },
+  });
+
+  useEffect(() => {
+    if (position) map.setView(position, map.getZoom(), { animate: true });
+  }, [position, map]);
+
+  return position === null ? null : <Marker position={position}></Marker>;
+}
+
 export function BloodFeed() {
   const { accessToken } = useAuth();
   const [requests, setRequests] = useState<BloodRequestOut[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [cooldownDays, setCooldownDays] = useState<number>(0);
   const [commitModalReq, setCommitModalReq] = useState<string | null>(null);
   const [commitUnits, setCommitUnits] = useState(1);
   const [commitEta, setCommitEta] = useState(2);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const fetchRequests = async (lat: number, lon: number) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    setLoading(true);
+    try {
+      const res = await fetch(`${apiBaseUrl}/blood-requests/nearby/for-me?latitude=${lat}&longitude=${lon}&radius_km=50`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal: abortControllerRef.current.signal
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) setRequests(data);
+      } else {
+        toast.error("Failed to fetch nearby requests.");
+      }
+    } catch (e: any) {
+      if (e.name !== 'AbortError') {
+        console.error(e);
+        toast.error("Error fetching requests.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -31,10 +82,10 @@ export function BloodFeed() {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
         setUserPos([latitude, longitude]);
-                // Fetch stats for cooldown
+        
         if (accessToken) {
           fetch(`${apiBaseUrl}/donors/me/stats`, {
             headers: { Authorization: `Bearer ${accessToken}` }
@@ -48,27 +99,20 @@ export function BloodFeed() {
             })
             .catch(console.error);
         }
-        try {
-          const res = await fetch(`${apiBaseUrl}/blood-requests/nearby/for-me?latitude=${latitude}&longitude=${longitude}&radius_km=50`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setRequests(data);
-          } else {
-            console.error("Failed to fetch");
-          }
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setLoading(false);
-        }
+        
+        fetchRequests(latitude, longitude);
       },
-      () => setLoading(false)
+      () => {
+        setLoading(false);
+      }
     );
+    
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [accessToken]);
-
-  if (loading) return <div className="flex h-[50vh] items-center justify-center p-8"><div className="flex flex-col items-center gap-3"><div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary border-r-primary"></div><p className="text-sm font-semibold text-slate-500">Locating nearby requests...</p></div></div>;
 
   return (
     <div className="p-8 flex flex-col h-full">
@@ -130,13 +174,23 @@ export function BloodFeed() {
             ))}
           </div>
           
-          <div className="w-full lg:w-1/2 min-h-[400px] border border-slate-200 rounded-xl overflow-hidden relative z-0">
+          <div className="w-full lg:w-1/2 flex flex-col">
+              <p className="text-xs text-slate-500 mb-2">Tap on the map to drop a pin and search for requests near that location.</p>
+              <div className="w-full min-h-[400px] flex-1 border border-slate-200 rounded-xl overflow-hidden relative z-0">
             {userPos && (
               <MapContainer center={userPos} zoom={11} style={{ height: "100%", width: "100%" }}>
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution="&copy; OpenStreetMap contributors"
                 />
+                  <SearchLocationMarker 
+                    position={userPos} 
+                    setPosition={setUserPos}
+                    onLocationUpdate={(lat, lon) => {
+                      fetchRequests(lat, lon);
+                    }}
+                  />
+
                 {/* User position */}
                 <Marker position={userPos}>
                   <Popup>You are here</Popup>
@@ -153,6 +207,7 @@ export function BloodFeed() {
                 ))}
               </MapContainer>
             )}
+            </div>
           </div>
         </div>
       )}

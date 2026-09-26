@@ -34,7 +34,7 @@ export function LocationAutocomplete({ onSelect, placeholder = "Search city or a
     setLoading(true);
     const delayDebounceFn = setTimeout(async () => {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk&addressdetails=1`);
         const data = await res.json();
         setResults(data.slice(0, 5));
         setShowDropdown(true);
